@@ -1,0 +1,30 @@
+name: mengacloud_period_tracker
+description: A period tracking app with 28-day cycle notifications.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  hive_flutter: ^1.1.0
+  hive: ^2.2.3
+  path_provider: ^2.1.3
+  flutter_local_notifications: ^17.2.2
+  timezone: ^0.9.4
+  flutter_timezone: ^5.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.11
+  hive_generator: ^2.0.1
+
+flutter:
+  uses-material-design: true
