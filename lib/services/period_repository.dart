@@ -23,8 +23,36 @@ class PeriodRepository {
     return all.last;
   }
 
-  /// Stores a new period record. Returns the saved instance.
-  Future<Period> recordPeriodStart(DateTime date) async {
+  /// Returns up to [maxEntries] most recent periods, newest first.
+  /// Older records remain in storage but are not returned.
+  List<Period> history({int maxEntries = 12}) {
+    if (_box.isEmpty) return const [];
+    final all = _box.values.toList()
+      ..sort((a, b) => b.startedDate.compareTo(a.startedDate));
+    if (all.length <= maxEntries) return all;
+    return all.sublist(0, maxEntries);
+  }
+
+  /// Returns `true` if a period was already recorded for [date]'s calendar
+  /// day (in local time).
+  bool hasPeriodOn(DateTime date) {
+    final day = DateTime(date.year, date.month, date.day);
+    for (final p in _box.values) {
+      final pDay = DateTime(
+        p.startedDate.year,
+        p.startedDate.month,
+        p.startedDate.day,
+      );
+      if (pDay == day) return true;
+    }
+    return false;
+  }
+
+  /// Stores a new period record if one does not already exist for [date]'s
+  /// calendar day. Returns the saved instance, or `null` if a record for
+  /// that day was already present.
+  Future<Period?> recordPeriodStart(DateTime date) async {
+    if (hasPeriodOn(date)) return null;
     final period = Period(startedDate: DateTime(date.year, date.month, date.day));
     await _box.add(period);
     return period;

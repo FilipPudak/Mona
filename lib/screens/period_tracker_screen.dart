@@ -5,6 +5,7 @@ import '../models/period.dart';
 import '../services/notification_service.dart';
 import '../services/period_repository.dart';
 import '../widgets/day_counter.dart';
+import 'history_screen.dart';
 
 class PeriodTrackerScreen extends StatefulWidget {
   const PeriodTrackerScreen({super.key});
@@ -27,6 +28,18 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     try {
       final today = DateTime.now();
       final saved = await _repo.recordPeriodStart(today);
+      if (saved == null) {
+        debugPrint('PeriodTracker: already logged for today');
+        if (!mounted) return;
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Already logged for today.'),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
       debugPrint('PeriodTracker: recorded ${saved.startedDate}');
       await NotificationService.instance
           .scheduleReminder(PeriodRepository.nextReminderDate(today));
@@ -70,7 +83,22 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('MengaCloud')),
+      appBar: AppBar(
+        title: const Text('MengaCloud'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const HistoryScreen(),
+                ),
+              );
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.black87),
+            child: const Text('History'),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
