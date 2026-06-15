@@ -158,22 +158,23 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
               SizedBox(
                 width: double.infinity,
                 height: 56,
-                child: FilledButton(
-                  onPressed: _onLogPeriod,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black87,
-                    side: const BorderSide(color: Colors.black12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  child: FilledButton(
+                    onPressed: _onLogPeriod,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black87,
+                      side: const BorderSide(color: Colors.black12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'ISOCPEUR',
+                      ),
                     ),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    child: const Text('Start'),
                   ),
-                  child: const Text('Period Started Today'),
-                ),
               ),
               const SizedBox(height: 32),
             ],

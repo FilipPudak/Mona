@@ -34,7 +34,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: const TextScaler.linear(1.25),
+      ),
+      child: MaterialApp(
       title: 'MengaCloud Period Tracker',
       theme: ThemeData(
         useMaterial3: true,
@@ -42,6 +46,7 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.purple,
           brightness: Brightness.light,
         ),
+        fontFamily: 'ISOCPEUR',
         scaffoldBackgroundColor: const Color(0xFFF5F7FA), // Light Nordic gray-white
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
@@ -50,6 +55,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: const PeriodTrackerScreen(),
+    ),
     );
   }
 }
