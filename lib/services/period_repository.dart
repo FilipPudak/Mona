@@ -73,7 +73,7 @@ class PeriodRepository {
   /// `start + reminderOffsetDays`.
   static DateTime nextReminderDate(DateTime start) {
     final day = DateTime(start.year, start.month, start.day)
-        .add(Duration(days: reminderOffsetDays));
+        .add(const Duration(days: reminderOffsetDays));
     return DateTime(day.year, day.month, day.day, 9);
   }
 }

@@ -5,9 +5,10 @@ import '../models/period.dart';
 /// A single row in the history list: the full date in long format with a
 /// hairline divider below. Read-only; no actions, no icons.
 class PeriodRow extends StatelessWidget {
-  const PeriodRow({super.key, required this.period});
+  const PeriodRow({super.key, required this.period, this.onTap});
 
   final Period period;
+  final VoidCallback? onTap;
 
   static const List<String> _months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -27,21 +28,24 @@ class PeriodRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Text(
-            _format(period.startedDate),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w400,
-                ),
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Text(
+              _format(period.startedDate),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w400,
+                  ),
+            ),
           ),
-        ),
-        const Divider(height: 1, thickness: 1, color: Color(0xFFEAECEF)),
-      ],
+          const Divider(height: 1, thickness: 1, color: Color(0xFFEAECEF)),
+        ],
+      ),
     );
   }
 }

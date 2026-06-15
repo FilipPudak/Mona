@@ -9,7 +9,7 @@ part 'period.g.dart';
 @HiveType(typeId: 0)
 class Period extends HiveObject {
   @HiveField(0)
-  final DateTime startedDate;
+  DateTime startedDate;
 
   /// Days elapsed since [startedDate] toward the next period.
   /// `0` = day 1 of the cycle. `-1` means the record is pending / not yet

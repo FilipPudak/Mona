@@ -5,6 +5,7 @@ import '../models/period.dart';
 import '../services/notification_service.dart';
 import '../services/period_repository.dart';
 import '../widgets/day_counter.dart';
+import '../widgets/period_list_picker.dart';
 import 'history_screen.dart';
 
 class PeriodTrackerScreen extends StatefulWidget {
@@ -23,38 +24,59 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     _repo = PeriodRepository(Hive.box<Period>(PeriodRepository.boxName));
   }
 
-  Future<void> _onPeriodStartedToday() async {
+  Future<void> _onLogPeriod() async {
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final today = DateTime.now();
-      final saved = await _repo.recordPeriodStart(today);
+      final current = _repo.currentPeriod();
+      final firstDate = current != null
+          ? current.startedDate.add(const Duration(days: 1))
+          : DateTime.now().subtract(const Duration(days: 27));
+      final lastDate = DateTime.now();
+
+      final picked = await PeriodListPicker.show(
+        context,
+        firstDate: firstDate,
+        lastDate: lastDate,
+      );
+      if (picked == null) return;
+
+      final saved = await _repo.recordPeriodStart(picked);
       if (saved == null) {
-        debugPrint('PeriodTracker: already logged for today');
         if (!mounted) return;
         messenger.showSnackBar(
           const SnackBar(
-            content: Text('Already logged for today.'),
+            content: Text('Already logged for that date.'),
             duration: Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
         );
         return;
       }
-      debugPrint('PeriodTracker: recorded ${saved.startedDate}');
-      await NotificationService.instance
-          .scheduleReminder(PeriodRepository.nextReminderDate(today));
-      debugPrint('PeriodTracker: reminder scheduled');
+
+      final nextReminder = PeriodRepository.nextReminderDate(picked);
+      if (!nextReminder.isBefore(DateTime.now())) {
+        await NotificationService.instance.scheduleReminder(nextReminder);
+      }
+
       if (!mounted) return;
       setState(() {});
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Logged period for ${saved.startedDate.toLocal().toString().split(' ').first}.'),
-          duration: const Duration(seconds: 3),
+          content: Text('Logged period for ${picked.toLocal().toString().split(' ').first}.'),
+          duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
+          persist: false,
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () async {
+              await saved.delete();
+              if (mounted) setState(() {});
+            },
+          ),
         ),
       );
     } catch (e, st) {
-      debugPrint('PeriodTracker: tap failed: $e\n$st');
+      debugPrint('PeriodTracker: log failed: $e\n$st');
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
@@ -73,13 +95,30 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     final day = period == null ? 1 : PeriodRepository.dayOfCycle(period.startedDate, today);
     final daysUntilNext = (28 - day).clamp(0, 28);
 
+    Color dayColor;
+    if (day >= 1 && day <= 6) {
+      dayColor = Colors.red;
+    } else if (day >= 11 && day <= 17) {
+      dayColor = Colors.green;
+    } else {
+      dayColor = Colors.black87;
+    }
+
     String caption;
     if (period == null) {
       caption = 'Tap below when your period starts.';
     } else if (daysUntilNext == 0) {
       caption = 'Period may start today.';
     } else {
-      caption = 'Next period in $daysUntilNext ${daysUntilNext == 1 ? "day" : "days"}.';
+      const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+      ];
+      const weekdays = [
+        'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+        'Friday', 'Saturday', 'Sunday',
+      ];
+      caption = '${weekdays[today.weekday - 1]}, ${today.day} ${months[today.month - 1]}';
     }
 
     return Scaffold(
@@ -87,12 +126,13 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
         title: const Text('MengaCloud'),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).push(
+            onPressed: () async {
+              await Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const HistoryScreen(),
                 ),
               );
+              if (mounted) setState(() {});
             },
             style: TextButton.styleFrom(foregroundColor: Colors.black87),
             child: const Text('History'),
@@ -105,7 +145,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
           child: Column(
             children: [
               const Spacer(),
-              DayCounter(day: day),
+              DayCounter(day: day, color: dayColor),
               const SizedBox(height: 16),
               Text(
                 caption,
@@ -119,7 +159,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
                 width: double.infinity,
                 height: 56,
                 child: FilledButton(
-                  onPressed: _onPeriodStartedToday,
+                  onPressed: _onLogPeriod,
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black87,
