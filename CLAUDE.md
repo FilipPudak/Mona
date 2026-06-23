@@ -47,6 +47,9 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - Main screen refreshes on return from history (await Navigator.push + setState)
 - Day number at 1.5x textScaler (via inner MediaQuery in `day_counter.dart`)
 
+## Build Scripts
+- `scripts/build_ios.sh` — builds a debug `.ipa` for SideStore deployment (run on macOS)
+
 ## Relevant Files
 - `lib/widgets/period_list_picker.dart`
 - `lib/widgets/period_calendar.dart`

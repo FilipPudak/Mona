@@ -33,11 +33,30 @@ You can also list pending alarms via:
 adb shell dumpsys alarm | grep mengacloud_period_tracker
 ```
 
-### iOS
+### iOS — with Apple Developer account ($99/yr)
 ```
 cd ios && pod install && cd ..
 flutter run -d <device-id>
 ```
+
+### iOS — free, no developer account (SideStore deployment)
+
+Prerequisites: macOS, iPhone, free Apple ID.
+
+**One-time phone setup:**
+1. On Mac, install [AltServer](https://altstore.io) and connect iPhone via USB
+2. Use AltServer to install [SideStore](https://sidestore.io) onto the iPhone
+3. On iPhone: **Settings → General → VPN & Device Management** → trust developer
+4. Install **LocalDevVPN** from the App Store
+
+**Build & deploy:**
+```bash
+chmod +x scripts/build_ios.sh
+./scripts/build_ios.sh
+```
+The script produces `build/MengaCloud-<version>.ipa`. AirDrop this `.ipa` to the iPhone, open SideStore, tap **+**, and select the file. The app appears as a normal home screen icon.
+
+**Refreshing:** SideStore auto-refreshes apps via LocalDevVPN before the 7-day certificate expires. If an app stops opening, open SideStore and tap **Refresh**.
 
 Grant notification permission when prompted. The scheduled notification will
 appear at the chosen date/time even if the app is closed.
