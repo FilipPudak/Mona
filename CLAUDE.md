@@ -1,4 +1,4 @@
-# MengaCloud — Period Tracker
+# Mona — Period Tracker
 
 ## Design
 Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, restrained purple seed color. ISOCPEUR typography.

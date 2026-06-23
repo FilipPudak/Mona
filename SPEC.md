@@ -1,4 +1,4 @@
-# MengaCloud Period Tracker — Spec
+# Mona Period Tracker — Spec
 
 ## 1. Overview
 A Flutter Android app that helps a single user track their menstrual cycle. The user records the start of a period via a list picker (today through last period+1), the app displays the current cycle day number with phase-based coloring, and schedules a local reminder 2 days before the next predicted period. A secondary history screen allows viewing, editing, and deleting past records.
@@ -37,7 +37,7 @@ A Flutter Android app that helps a single user track their menstrual cycle. The 
 
 ### 6.1 Main Screen (`PeriodTrackerScreen`)
 - Layout (top to bottom, centered):
-  1. App title "MengaCloud" in app bar. Top-right: "History" text button → pushes history screen. On return, screen refreshes (await Navigator.push + setState).
+  1. App title "Mona" in app bar. Top-right: "History" text button → pushes history screen. On return, screen refreshes (await Navigator.push + setState).
   2. Large day number (50% bigger than default via inner MediaQuery at 1.5x textScaler, on top of global 1.25x) with cycle phase color.
   3. Date caption: formatted current date (e.g. "Sunday, June 15").
   4. Subtitle: "Period may start today." if day ≥ 28.

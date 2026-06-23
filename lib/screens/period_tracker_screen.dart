@@ -123,7 +123,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('MengaCloud'),
+        title: const Text('Mona'),
         actions: [
           TextButton(
             onPressed: () async {

@@ -1,4 +1,4 @@
-package com.example.mengacloud_period_tracker
+package com.example.mona
 
 import io.flutter.embedding.android.FlutterActivity
 

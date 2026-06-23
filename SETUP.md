@@ -30,7 +30,7 @@ before committing.
 
 You can also list pending alarms via:
 ```
-adb shell dumpsys alarm | grep mengacloud_period_tracker
+adb shell dumpsys alarm | grep mona
 ```
 
 ### iOS — with Apple Developer account ($99/yr)
@@ -54,7 +54,7 @@ Prerequisites: macOS, iPhone, free Apple ID.
 chmod +x scripts/build_ios.sh
 ./scripts/build_ios.sh
 ```
-The script produces `build/MengaCloud-<version>.ipa`. AirDrop this `.ipa` to the iPhone, open SideStore, tap **+**, and select the file. The app appears as a normal home screen icon.
+The script produces `build/Mona-<version>.ipa`. AirDrop this `.ipa` to the iPhone, open SideStore, tap **+**, and select the file. The app appears as a normal home screen icon.
 
 **Refreshing:** SideStore auto-refreshes apps via LocalDevVPN before the 7-day certificate expires. If an app stops opening, open SideStore and tap **Refresh**.
 
@@ -79,5 +79,5 @@ appear at the chosen date/time even if the app is closed.
 - No app icon customization — the default Flutter launcher icon is used.
 - No release signing config — `flutter run --release` is signed with debug
   keys (TODO in `build.gradle.kts`).
-- No bundle identifier change — still `com.example.mengacloud_period_tracker`.
+- No bundle identifier change — still `com.example.mona`.
   Update before publishing.

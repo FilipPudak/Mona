@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-APP_NAME="MengaCloud"
+APP_NAME="Mona"
 CONFIG="debug"
 NO_CODESIGN="--no-codesign"
 NO_CLEAN=false

@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "mengacloud_period_tracker" "\0"
+            VALUE "FileDescription", "Mona" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "mengacloud_period_tracker" "\0"
+            VALUE "InternalName", "Mona" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "mengacloud_period_tracker.exe" "\0"
-            VALUE "ProductName", "mengacloud_period_tracker" "\0"
+            VALUE "OriginalFilename", "Mona.exe" "\0"
+            VALUE "ProductName", "Mona" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

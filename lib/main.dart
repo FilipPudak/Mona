@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         textScaler: const TextScaler.linear(1.25),
       ),
       child: MaterialApp(
-      title: 'MengaCloud Period Tracker',
+      title: 'Mona',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(

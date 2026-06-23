@@ -1,4 +1,4 @@
-name: mengacloud_period_tracker
+name: mona
 description: A period tracking app with 28-day cycle notifications.
 
 publish_to: 'none'
