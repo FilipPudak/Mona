@@ -76,7 +76,7 @@ appear at the chosen date/time even if the app is closed.
   permission prompt. Set to a friendly sentence explaining the reminder.
 
 ## What's intentionally not done
-- No app icon customization — the default Flutter launcher icon is used.
+- Custom app icon: pink sphere on white background via flutter_launcher_icons.
 - No release signing config — `flutter run --release` is signed with debug
   keys (TODO in `build.gradle.kts`).
 - No bundle identifier change — still `com.example.mona`.

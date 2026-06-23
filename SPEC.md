@@ -30,7 +30,7 @@ A Flutter Android app that helps a single user track their menstrual cycle. The 
 - Current day: `daysBetween(today, period.startedDate) + 1`, clamped to 1..28.
   - Day 1 = the start date.
   - Day 28 = predicted next start.
-- Cycle phase colors: day 1-6 red, day 11-17 green, else black.
+- Cycle phase colors: day 1-6 #E68192, day 11-17 green, else black.
 - Notification target: `period.startedDate + 26 days` (2 days before day 28).
 
 ## 6. UI
@@ -38,8 +38,8 @@ A Flutter Android app that helps a single user track their menstrual cycle. The 
 ### 6.1 Main Screen (`PeriodTrackerScreen`)
 - Layout (top to bottom, centered):
   1. App title "Mona" in app bar. Top-right: "History" text button → pushes history screen. On return, screen refreshes (await Navigator.push + setState).
-  2. Large day number (50% bigger than default via inner MediaQuery at 1.5x textScaler, on top of global 1.25x) with cycle phase color.
-  3. Date caption: formatted current date (e.g. "Sunday, June 15").
+  2. Large day number (50% bigger than default via inner MediaQuery at 1.5x textScaler, on top of global 1.25x) with cycle phase color. Hidden when no period logged.
+  3. Date caption: formatted current date (e.g. "Sunday, June 15"). Shows "Tap below when your period starts." when no period logged.
   4. Subtitle: "Period may start today." if day ≥ 28.
   5. Single primary button: "Start".
 - Button opens a list picker bottom sheet (`PeriodListPicker`) with options from `lastPeriod.startedDate + 1` up to today. Labels: "Today", "Yesterday", "X days ago" with absolute date.

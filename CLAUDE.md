@@ -19,7 +19,7 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - Tap row to edit: opens calendar pre-selected to that record's date
 - SnackBar Undo after every log, delete, and edit action
 - All SnackBars with actions must set `persist: false` (Flutter 3.44 breaking change)
-- Cycle colors: day 1-6 red, day 11-17 green, else black
+- Cycle colors: day 1-6 #E68192, day 11-17 green, else black
 - Main screen: formatted date caption (e.g. "Sunday, June 15"), "Period may start today" if due
 - Day number: 50% bigger than default (1.5x textScaler override on top of 1.25x global)
 - Global text scaling: 125% via `TextScaler.linear(1.25)` in `MediaQuery`
