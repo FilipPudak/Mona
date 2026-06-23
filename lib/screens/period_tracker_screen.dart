@@ -97,7 +97,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
 
     Color dayColor = Colors.black87;
     if (day >= 1 && day <= 6) {
-      dayColor = Colors.red;
+      dayColor = const Color(0xFFE68192);
     } else if (day >= 11 && day <= 17) {
       dayColor = Colors.green;
     }
