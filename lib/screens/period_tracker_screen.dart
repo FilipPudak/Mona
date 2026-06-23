@@ -92,16 +92,14 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
   Widget build(BuildContext context) {
     final period = _repo.currentPeriod();
     final today = DateTime.now();
-    final day = period == null ? 1 : PeriodRepository.dayOfCycle(period.startedDate, today);
+    final day = period == null ? 0 : PeriodRepository.dayOfCycle(period.startedDate, today);
     final daysUntilNext = (28 - day).clamp(0, 28);
 
-    Color dayColor;
+    Color dayColor = Colors.black87;
     if (day >= 1 && day <= 6) {
       dayColor = Colors.red;
     } else if (day >= 11 && day <= 17) {
       dayColor = Colors.green;
-    } else {
-      dayColor = Colors.black87;
     }
 
     String caption;
@@ -145,8 +143,10 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
           child: Column(
             children: [
               const Spacer(),
-              DayCounter(day: day, color: dayColor),
-              const SizedBox(height: 16),
+              if (period != null) ...[
+                DayCounter(day: day, color: dayColor),
+                const SizedBox(height: 16),
+              ],
               Text(
                 caption,
                 textAlign: TextAlign.center,
