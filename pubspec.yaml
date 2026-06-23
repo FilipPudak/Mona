@@ -47,3 +47,5 @@ flutter_launcher_icons:
   web:
     generate: true
   image_path: "assets/mona_icon.png"
+  adaptive_icon_foreground: "assets/mona_icon_foreground.png"
+  adaptive_icon_background: "#FEFEFE"
