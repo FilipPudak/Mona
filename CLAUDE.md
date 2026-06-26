@@ -48,7 +48,7 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - Main screen refreshes on return from history (await Navigator.push + setState)
 - Day number at 1.5x textScaler (via inner MediaQuery in `day_counter.dart`)
 
-### Not Yet Implemented (see PRD.md)
+### Not Yet Implemented (see docs/PRD.md)
 - Hive model fields: `trackingMode`, `manualCycleLength`, `reminderDaysBefore`
 - Dynamic cycle length (remove hardcoded 28, replace with currentCycleLength())
 - Auto-averaging engine: `averageCycleLength()`, `hasMinimumCycles()`, 42-day cap
@@ -76,7 +76,8 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - `lib/main.dart`
 - `pubspec.yaml`
 - `fonts/ISOCPEUR.ttf`
-- `PRD.md`
+- `docs/PRD.md`
+- `docs/ProductBrief.md`
 
 ## Domain Model (from CONTEXT.md — read before editing)
 - **Tracking**: Hybrid mode (manual default 28, auto enabled by default — kicks in silently after 3 complete cycles, always switchable)
