@@ -66,8 +66,10 @@ void main() {
       (WidgetTester tester) async {
     final now = DateTime.now();
     final start = now.subtract(const Duration(days: 10));
-    final box = Hive.box<Period>('periods');
-    await box.add(Period(startedDate: start));
+    await tester.runAsync(() async {
+      final box = Hive.box<Period>('periods');
+      await box.add(Period(startedDate: start));
+    });
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -82,8 +84,10 @@ void main() {
       (WidgetTester tester) async {
     final now = DateTime.now();
     final start = now.subtract(const Duration(days: 28));
-    final box = Hive.box<Period>('periods');
-    await box.add(Period(startedDate: start));
+    await tester.runAsync(() async {
+      final box = Hive.box<Period>('periods');
+      await box.add(Period(startedDate: start));
+    });
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -95,8 +99,10 @@ void main() {
       (WidgetTester tester) async {
     final now = DateTime.now();
     final start = now.subtract(const Duration(days: 45));
-    final box = Hive.box<Period>('periods');
-    await box.add(Period(startedDate: start));
+    await tester.runAsync(() async {
+      final box = Hive.box<Period>('periods');
+      await box.add(Period(startedDate: start));
+    });
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
