@@ -62,6 +62,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  void _onInfoTap() {
+    final count = _repo.periodCount;
+    final eligible = _repo.eligibleForAuto();
+    final avg = _repo.averageCycleLength();
+    final message = eligible
+        ? 'Based on your $count recorded cycle${count == 1 ? '' : 's'}. Average: $avg days.'
+        : 'Not enough cycles yet (need at least 4 logged periods).';
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _toggleNotifications(bool on) {
     setState(() => _notificationsOn = on);
     if (on) {
@@ -88,6 +109,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final trackingMode = _repo.trackingMode;
     final isAuto = trackingMode == 'automatic';
+    final cycleLength = _repo.currentCycleLength();
     final manualLength = _repo.manualCycleLength;
     final reminderDays = _repo.reminderDaysBefore;
 
@@ -116,9 +138,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('$manualLength days'),
+                      Text('$cycleLength days'),
                       const SizedBox(width: 4),
-                      Icon(Icons.info_outline, size: 18, color: Colors.grey.shade600),
+                      GestureDetector(
+                        onTap: _onInfoTap,
+                        child: Icon(Icons.info_outline, size: 18, color: Colors.grey.shade600),
+                      ),
                     ],
                   )
                 : Row(

@@ -14,7 +14,9 @@ class PeriodRepository {
 
   final Box<Period> _box;
 
-  bool hasMinimumCycles() => _box.values.length >= 4;
+  int get periodCount => _box.values.length;
+
+  bool hasMinimumCycles() => periodCount >= 4;
 
   bool eligibleForAuto() =>
       trackingMode == 'automatic' && hasMinimumCycles() &&
