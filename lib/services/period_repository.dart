@@ -10,10 +10,33 @@ class PeriodRepository {
   PeriodRepository(this._box);
 
   static const String boxName = 'periods';
-  static const int cycleLength = 28;
   static const int reminderOffsetDays = 26; // 2 days before day 28
 
   final Box<Period> _box;
+
+  bool hasMinimumCycles() => _box.values.length >= 4;
+
+  bool eligibleForAuto() =>
+      trackingMode == 'automatic' && hasMinimumCycles() &&
+      averageCycleLength() != null;
+
+  int currentCycleLength() {
+    if (eligibleForAuto()) return averageCycleLength()!;
+    return manualCycleLength;
+  }
+
+  int? averageCycleLength() {
+    final all = _box.values.toList()
+      ..sort((a, b) => a.startedDate.compareTo(b.startedDate));
+    if (all.length < 4) return null;
+    final gaps = <int>[];
+    for (int i = 1; i < all.length; i++) {
+      final gap = all[i].startedDate.difference(all[i - 1].startedDate).inDays;
+      if (gap <= 42) gaps.add(gap);
+    }
+    if (gaps.length < 3) return null;
+    return (gaps.reduce((a, b) => a + b) / gaps.length).round();
+  }
 
   String get trackingMode => currentPeriod()?.trackingMode ?? 'automatic';
   int get manualCycleLength => currentPeriod()?.manualCycleLength ?? 28;
@@ -84,8 +107,8 @@ class PeriodRepository {
   }
 
   /// Cycle day (1-based) for [today] given a period starting on [start].
-  /// Clamped to 1..[cycleLength].
-  static int dayOfCycle(DateTime start, DateTime today) {
+  /// Clamped to 1..[cycleLength]. Default cap is 28 when not specified.
+  static int dayOfCycle(DateTime start, DateTime today, {int cycleLength = 28}) {
     final startDay = DateTime(start.year, start.month, start.day);
     final todayDay = DateTime(today.year, today.month, today.day);
     final diff = todayDay.difference(startDay).inDays + 1;

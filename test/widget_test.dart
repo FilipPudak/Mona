@@ -6,7 +6,6 @@ import 'package:hive/hive.dart';
 
 import 'package:mona/main.dart';
 import 'package:mona/models/period.dart';
-import 'package:mona/services/period_repository.dart';
 import 'package:mona/screens/settings_screen.dart';
 
 void main() {
@@ -31,7 +30,8 @@ void main() {
     expect(find.text('Mona'), findsOneWidget);
   });
 
-  testWidgets('App bar has gear icon for settings', (WidgetTester tester) async {
+  testWidgets('App bar has gear icon for settings',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
@@ -58,39 +58,57 @@ void main() {
     await tester.pump();
 
     expect(find.text('Tap below when your period starts.'), findsOneWidget);
-    // Day counter should not render when no period is logged (no large digits)
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsNothing);
   });
 
-  testWidgets('Logged state shows day counter and caption',
+  testWidgets('Logged state shows "Next: Month Day" caption',
       (WidgetTester tester) async {
     final now = DateTime.now();
-    final yesterday = now.subtract(const Duration(days: 1));
+    final start = now.subtract(const Duration(days: 10));
     final box = Hive.box<Period>('periods');
-    await box.add(Period(startedDate: yesterday));
+    await box.add(Period(startedDate: start));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
-    // Day counter shows day 2 (yesterday = day 1, today = day 2)
-    expect(find.text('2'), findsOneWidget);
-    // Empty-state prompt should not appear
-    expect(
-      find.text('Tap below when your period starts.'),
-      findsNothing,
-    );
-    // Caption shows today's date in "Weekday, day Month" format
-    const weekdays = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-      'Friday', 'Saturday', 'Sunday',
-    ];
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-    final expectedCaption =
-        '${weekdays[now.weekday - 1]}, ${now.day} ${months[now.month - 1]}';
-    expect(find.text(expectedCaption), findsOneWidget);
+    final dueDate = start.add(const Duration(days: 28));
+    final expected = 'Next: ${_monthName(dueDate.month)} ${dueDate.day}';
+    expect(find.text(expected), findsOneWidget);
+    expect(find.text('Tap below when your period starts.'), findsNothing);
   });
+
+  testWidgets('Due window shows "Period may start today."',
+      (WidgetTester tester) async {
+    final now = DateTime.now();
+    final start = now.subtract(const Duration(days: 28));
+    final box = Hive.box<Period>('periods');
+    await box.add(Period(startedDate: start));
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    expect(find.text('Period may start today.'), findsOneWidget);
+  });
+
+  testWidgets('Overdue shows "Log your new period."',
+      (WidgetTester tester) async {
+    final now = DateTime.now();
+    final start = now.subtract(const Duration(days: 45));
+    final box = Hive.box<Period>('periods');
+    await box.add(Period(startedDate: start));
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    expect(find.text('Log your new period.'), findsOneWidget);
+  });
+}
+
+String _monthName(int month) {
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+  return months[month - 1];
 }

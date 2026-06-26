@@ -120,10 +120,22 @@ void main() {
       expect(PeriodRepository.dayOfCycle(start, today), 15);
     });
 
-    test('caps at cycleLength (28) when overdue', () {
+    test('defaults to 28-day cap when no cycleLength given', () {
       final start = DateTime(2026, 5, 1);
       final today = DateTime(2026, 6, 26);
       expect(PeriodRepository.dayOfCycle(start, today), 28);
+    });
+
+    test('uses provided cycleLength as cap', () {
+      final start = DateTime(2026, 6, 1);
+      final today = DateTime(2026, 7, 1);
+      expect(PeriodRepository.dayOfCycle(start, today, cycleLength: 35), 31);
+    });
+
+    test('caps at provided cycleLength when overdue', () {
+      final start = DateTime(2026, 6, 1);
+      final today = DateTime(2026, 7, 20);
+      expect(PeriodRepository.dayOfCycle(start, today, cycleLength: 35), 35);
     });
 
     test('clamps to minimum of 1', () {
@@ -167,6 +179,100 @@ void main() {
       await repo.recordPeriodStart(DateTime(2026, 6, 1));
       await repo.setReminderDaysBefore(3);
       expect(repo.reminderDaysBefore, 3);
+    });
+  });
+
+  group('prediction engine', () {
+    group('hasMinimumCycles', () {
+      test('returns false with 0, 1, 2, or 3 periods', () async {
+        expect(repo.hasMinimumCycles(), isFalse);
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        expect(repo.hasMinimumCycles(), isFalse);
+        await repo.recordPeriodStart(DateTime(2026, 2, 1));
+        expect(repo.hasMinimumCycles(), isFalse);
+        await repo.recordPeriodStart(DateTime(2026, 3, 1));
+        expect(repo.hasMinimumCycles(), isFalse);
+      });
+
+      test('returns true with 4 periods (3 complete cycles)', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        await repo.recordPeriodStart(DateTime(2026, 2, 1));
+        await repo.recordPeriodStart(DateTime(2026, 3, 1));
+        await repo.recordPeriodStart(DateTime(2026, 4, 1));
+        expect(repo.hasMinimumCycles(), isTrue);
+      });
+    });
+
+    group('averageCycleLength', () {
+      test('computes average of 30-day cycles', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        await repo.recordPeriodStart(DateTime(2026, 1, 31));
+        await repo.recordPeriodStart(DateTime(2026, 3, 2));
+        await repo.recordPeriodStart(DateTime(2026, 4, 1));
+        expect(repo.averageCycleLength(), 30);
+      });
+
+      test('returns null with fewer than 4 periods', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        await repo.recordPeriodStart(DateTime(2026, 2, 1));
+        await repo.recordPeriodStart(DateTime(2026, 3, 1));
+        expect(repo.averageCycleLength(), isNull);
+      });
+
+      test('excludes gaps over 42 days', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        await repo.recordPeriodStart(DateTime(2026, 2, 1));
+        await repo.recordPeriodStart(DateTime(2026, 3, 1));
+        await repo.recordPeriodStart(DateTime(2026, 7, 1));
+        // gap from Mar 1 to Jul 1 is 122 days > 42, so only 1 gap remains
+        expect(repo.averageCycleLength(), isNull);
+      });
+
+      test('computes average excluding large gaps, keeping ≥3', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        await repo.recordPeriodStart(DateTime(2026, 2, 1));
+        await repo.recordPeriodStart(DateTime(2026, 3, 1));
+        await repo.recordPeriodStart(DateTime(2026, 4, 1));
+        await repo.recordPeriodStart(DateTime(2026, 10, 1));
+        // gaps: 31, 28, 31 (≤42), 183 (>42 excluded)
+        // 3 valid gaps → (31+28+31)/3 = 30
+        expect(repo.averageCycleLength(), 30);
+      });
+
+      test('returns null when exclusion drops valid gaps below 3', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        await repo.recordPeriodStart(DateTime(2026, 2, 1));
+        await repo.recordPeriodStart(DateTime(2027, 3, 1));
+        await repo.recordPeriodStart(DateTime(2027, 4, 1));
+        await repo.recordPeriodStart(DateTime(2028, 5, 1));
+        // gaps: 31 (Jan→Feb), 393 (>42 excluded), 31, 395 (>42 excluded)
+        // only 2 valid gaps → null
+        expect(repo.averageCycleLength(), isNull);
+      });
+    });
+
+    group('currentCycleLength', () {
+      test('returns manualCycleLength in manual mode', () async {
+        await repo.recordPeriodStart(DateTime(2026, 6, 1));
+        await repo.setManualCycleLength(35);
+        await repo.setTrackingMode('manual');
+        expect(repo.currentCycleLength(), 35);
+      });
+
+      test('falls back to manualCycleLength in auto mode with <4 periods',
+          () async {
+        await repo.recordPeriodStart(DateTime(2026, 6, 1));
+        await repo.setManualCycleLength(35);
+        expect(repo.currentCycleLength(), 35);
+      });
+
+      test('returns average in auto mode with 4+ periods', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        await repo.recordPeriodStart(DateTime(2026, 1, 31));
+        await repo.recordPeriodStart(DateTime(2026, 3, 2));
+        await repo.recordPeriodStart(DateTime(2026, 4, 1));
+        expect(repo.currentCycleLength(), 30);
+      });
     });
   });
 

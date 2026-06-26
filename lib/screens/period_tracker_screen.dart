@@ -93,8 +93,13 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
   Widget build(BuildContext context) {
     final period = _repo.currentPeriod();
     final today = DateTime.now();
-    final day = period == null ? 0 : PeriodRepository.dayOfCycle(period.startedDate, today);
-    final daysUntilNext = (28 - day).clamp(0, 28);
+    final cycleLength = _repo.currentCycleLength();
+    final day = period == null
+        ? 0
+        : PeriodRepository.dayOfCycle(
+            period.startedDate, today,
+            cycleLength: cycleLength,
+          );
 
     Color dayColor = Colors.black87;
     if (day >= 1 && day <= 6) {
@@ -106,18 +111,24 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     String caption;
     if (period == null) {
       caption = 'Tap below when your period starts.';
-    } else if (daysUntilNext == 0) {
-      caption = 'Period may start today.';
     } else {
-      const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
-      ];
-      const weekdays = [
-        'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-        'Friday', 'Saturday', 'Sunday',
-      ];
-      caption = '${weekdays[today.weekday - 1]}, ${today.day} ${months[today.month - 1]}';
+      final dueDate = DateTime(
+        period.startedDate.year,
+        period.startedDate.month,
+        period.startedDate.day,
+      ).add(Duration(days: cycleLength));
+      final diff = today.difference(dueDate).inDays;
+      if (diff < 0) {
+        const months = [
+          'January', 'February', 'March', 'April', 'May', 'June',
+          'July', 'August', 'September', 'October', 'November', 'December',
+        ];
+        caption = 'Next: ${months[dueDate.month - 1]} ${dueDate.day}';
+      } else if (diff <= 7) {
+        caption = 'Period may start today.';
+      } else {
+        caption = 'Log your new period.';
+      }
     }
 
     return Scaffold(
