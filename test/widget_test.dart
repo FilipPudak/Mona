@@ -7,6 +7,7 @@ import 'package:hive/hive.dart';
 import 'package:mona/main.dart';
 import 'package:mona/models/period.dart';
 import 'package:mona/screens/settings_screen.dart';
+import 'package:mona/widgets/period_row.dart';
 
 void main() {
   setUp(() async {
@@ -164,6 +165,63 @@ void main() {
     await tester.pump();
 
     expect(find.text('Log your new period.'), findsOneWidget);
+  });
+
+  testWidgets('Settings: notifications switch toggles', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+
+    final switchFinder = find.byType(Switch);
+    expect(switchFinder, findsOneWidget);
+
+    await tester.tap(switchFinder);
+    await tester.pumpAndSettle();
+
+    final switchWidget = tester.widget<Switch>(switchFinder);
+    expect(switchWidget.value, isFalse);
+  });
+
+  testWidgets('History shows empty state', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    await tester.tap(find.text('History'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No periods logged yet.'), findsOneWidget);
+  });
+
+  testWidgets('History shows period rows when periods exist', (WidgetTester tester) async {
+    await tester.runAsync(() async {
+      final box = Hive.box<Period>('periods');
+      await box.add(Period(startedDate: DateTime(2026, 6, 1)));
+    });
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    await tester.tap(find.text('History'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PeriodRow), findsOneWidget);
+  });
+
+  testWidgets('Log period: Start button opens picker', (WidgetTester tester) async {
+    addTearDown(() async { await tester.binding.setSurfaceSize(Size.zero); });
+    await tester.binding.setSurfaceSize(const Size(800, 1000));
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    await tester.tap(find.text('Start'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Period started on?'), findsOneWidget);
+    expect(find.text('Today'), findsOneWidget);
   });
 }
 

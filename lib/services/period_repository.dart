@@ -16,11 +16,10 @@ class PeriodRepository {
 
   int get periodCount => _box.values.length;
 
-  bool hasMinimumCycles() => periodCount >= 4;
+  bool hasEnoughHistory() => periodCount >= 4;
 
   bool eligibleForAuto() =>
-      trackingMode == 'automatic' && hasMinimumCycles() &&
-      averageCycleLength() != null;
+      trackingMode == 'automatic' && averageCycleLength() != null;
 
   int currentCycleLength() {
     if (eligibleForAuto()) return averageCycleLength()!;

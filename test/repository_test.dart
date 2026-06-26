@@ -183,15 +183,15 @@ void main() {
   });
 
   group('prediction engine', () {
-    group('hasMinimumCycles', () {
+    group('hasEnoughHistory', () {
       test('returns false with 0, 1, 2, or 3 periods', () async {
-        expect(repo.hasMinimumCycles(), isFalse);
+        expect(repo.hasEnoughHistory(), isFalse);
         await repo.recordPeriodStart(DateTime(2026, 1, 1));
-        expect(repo.hasMinimumCycles(), isFalse);
+        expect(repo.hasEnoughHistory(), isFalse);
         await repo.recordPeriodStart(DateTime(2026, 2, 1));
-        expect(repo.hasMinimumCycles(), isFalse);
+        expect(repo.hasEnoughHistory(), isFalse);
         await repo.recordPeriodStart(DateTime(2026, 3, 1));
-        expect(repo.hasMinimumCycles(), isFalse);
+        expect(repo.hasEnoughHistory(), isFalse);
       });
 
       test('returns true with 4 periods (3 complete cycles)', () async {
@@ -199,7 +199,7 @@ void main() {
         await repo.recordPeriodStart(DateTime(2026, 2, 1));
         await repo.recordPeriodStart(DateTime(2026, 3, 1));
         await repo.recordPeriodStart(DateTime(2026, 4, 1));
-        expect(repo.hasMinimumCycles(), isTrue);
+        expect(repo.hasEnoughHistory(), isTrue);
       });
     });
 
@@ -272,6 +272,46 @@ void main() {
         await repo.recordPeriodStart(DateTime(2026, 3, 2));
         await repo.recordPeriodStart(DateTime(2026, 4, 1));
         expect(repo.currentCycleLength(), 30);
+      });
+    });
+
+    group('eligibleForAuto', () {
+      test('returns false when no periods exist', () {
+        expect(repo.eligibleForAuto(), isFalse);
+      });
+
+      test('returns false with 1, 2, or 3 periods', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        expect(repo.eligibleForAuto(), isFalse);
+        await repo.recordPeriodStart(DateTime(2026, 2, 1));
+        expect(repo.eligibleForAuto(), isFalse);
+        await repo.recordPeriodStart(DateTime(2026, 3, 1));
+        expect(repo.eligibleForAuto(), isFalse);
+      });
+
+      test('returns true with 4 periods and valid gaps', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        await repo.recordPeriodStart(DateTime(2026, 1, 31));
+        await repo.recordPeriodStart(DateTime(2026, 3, 2));
+        await repo.recordPeriodStart(DateTime(2026, 4, 1));
+        expect(repo.eligibleForAuto(), isTrue);
+      });
+
+      test('returns false in manual mode', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        await repo.recordPeriodStart(DateTime(2026, 1, 31));
+        await repo.recordPeriodStart(DateTime(2026, 3, 2));
+        await repo.recordPeriodStart(DateTime(2026, 4, 1));
+        await repo.setTrackingMode('manual');
+        expect(repo.eligibleForAuto(), isFalse);
+      });
+
+      test('returns false when all gaps exceed 42 days', () async {
+        await repo.recordPeriodStart(DateTime(2026, 1, 1));
+        await repo.recordPeriodStart(DateTime(2026, 5, 1));
+        await repo.recordPeriodStart(DateTime(2026, 9, 1));
+        await repo.recordPeriodStart(DateTime(2027, 1, 1));
+        expect(repo.eligibleForAuto(), isFalse);
       });
     });
   });

@@ -48,17 +48,7 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - Main screen refreshes on return from history (await Navigator.push + setState)
 - Day number at 1.5x textScaler (via inner MediaQuery in `day_counter.dart`)
 
-### Not Yet Implemented (see docs/PRD.md)
-- Hive model fields: `trackingMode`, `manualCycleLength`, `reminderDaysBefore`
-- Dynamic cycle length (remove hardcoded 28, replace with currentCycleLength())
-- Auto-averaging engine: `averageCycleLength()`, `hasMinimumCycles()`, 42-day cap
-- Main screen caption: expected date "Next: June 28" instead of today's date
-- Overdue handling: 7-day "Period may start today" → "Log your new period"
-- Settings screen with gear icon, radio buttons, pickers, notifications toggle
-- Dynamic notification message and scheduling
-- Remove dead code: `currentDayCounter` field on Period model
-- Update `pubspec.yaml` description (still says "28-day cycle")
-- Repository tests + widget tests for new behavior
+### All PRD items implemented
 
 ## Build Scripts
 - `scripts/build_ios.sh` — builds a debug `.ipa` for SideStore deployment (run on macOS)

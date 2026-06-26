@@ -20,7 +20,7 @@ Implement the full domain model as defined in CONTEXT.md:
 
 5. **Day counter capped at cycle length** — The cycle-day convention (1-based, capped at cycle length) is preserved and made dynamic. Phase colors (rose 1–6, green 11–17) are relative to the actual cycle length.
 
-6. **Prediction engine** — The repository gains an `averageCycleLength()` function that computes the mean of complete cycle lengths, excluding gaps >42 days. Eligibility is checked via `hasMinimumCycles()` (3 or more complete cycles). Due date is always `lastPeriodStart + cycleLength`.
+6. **Prediction engine** — The repository gains an `averageCycleLength()` function that computes the mean of complete cycle lengths, excluding gaps >42 days. Eligibility is checked via `hasEnoughHistory()` (3 or more complete cycles). Due date is always `lastPeriodStart + cycleLength`.
 
 ## User Stories
 
@@ -92,8 +92,8 @@ New methods on the repository:
 
 - `currentCycleLength()` — Returns the effective cycle length based on current tracking mode. Delegates to `manualCycleLength` or `averageCycleLength()`.
 - `averageCycleLength()` — Computes the mean of all complete cycle lengths (gaps between consecutive period starts) that are ≤ 42 days. Returns `null` if fewer than 3 complete cycles exist.
-- `hasMinimumCycles()` — Returns true when 3 or more complete cycles are available.
-- `eligibleForAuto()` — Returns true when automatic mode is active AND `hasMinimumCycles()` is true. If false, `currentCycleLength()` falls back to `manualCycleLength` (default 28).
+- `hasEnoughHistory()` — Returns true when 3 or more complete cycles are available.
+- `eligibleForAuto()` — Returns true when automatic mode is active AND `hasEnoughHistory()` is true. If false, `currentCycleLength()` falls back to `manualCycleLength` (default 28).
 
 `dayOfCycle()` and `nextReminderDate()` become instance methods (or accept a cycleLength parameter) instead of using the hardcoded 28 constant. The day counter caps at `cycleLength`, not at 28.
 
@@ -122,7 +122,7 @@ A `SettingsScreen` widget with the following structure:
 - **Notifications**: A switch. OFF cancels all pending reminders via `NotificationService.cancelReminder()`. ON reschedules based on current data via `NotificationService.scheduleReminder()`.
 - **Privacy**: A static row: "Your data stays on this device." Informational, not interactive.
 
-Entry point: a gear icon in the app bar, to the left of the "History" text button. Tapping it pushes the SettingsScreen via `Navigator.push`. The main screen refreshes on return (same pattern as History).
+Entry point: a gear icon in the app bar, to the right of the "History" text button. Tapping it pushes the SettingsScreen via `Navigator.push`. The main screen refreshes on return (same pattern as History).
 
 ### Notification Service
 
@@ -133,7 +133,7 @@ Entry point: a gear icon in the app bar, to the left of the "History" text butto
 
 ### What makes a good test
 
-Tests should verify external behavior, not implementation details. For repository tests, this means exercising the public API (`currentCycleLength()`, `averageCycleLength()`, `hasMinimumCycles()`, `dayOfCycle()`, `nextReminderDate()`) with various data states and asserting the correct output. For widget tests, this means verifying that the correct text and visual elements appear given a particular data state.
+Tests should verify external behavior, not implementation details. For repository tests, this means exercising the public API (`currentCycleLength()`, `averageCycleLength()`, `hasEnoughHistory()`, `dayOfCycle()`, `nextReminderDate()`) with various data states and asserting the correct output. For widget tests, this means verifying that the correct text and visual elements appear given a particular data state.
 
 ### Seam 1: Repository tests (`test/repository_test.dart`)
 

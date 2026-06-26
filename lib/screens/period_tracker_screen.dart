@@ -142,17 +142,6 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
       appBar: AppBar(
         title: const Text('Mona'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const SettingsScreen(),
-                ),
-              );
-              if (mounted) setState(() {});
-            },
-          ),
           TextButton(
             onPressed: () async {
               await Navigator.of(context).push(
@@ -164,6 +153,17 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
             },
             style: TextButton.styleFrom(foregroundColor: Colors.black87),
             child: const Text('History'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const SettingsScreen(),
+                ),
+              );
+              if (mounted) setState(() {});
+            },
           ),
         ],
       ),
