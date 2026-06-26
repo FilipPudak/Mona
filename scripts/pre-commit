@@ -4,6 +4,7 @@ set -e
 
 echo "=== dart format ==="
 dart format --set-exit-if-changed lib/ test/
+git add -A
 
 echo "=== flutter analyze ==="
 flutter analyze

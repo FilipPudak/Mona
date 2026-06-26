@@ -44,6 +44,14 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Screenshots and stray PNGs
+*.png
+!assets/**/*.png
+!android/**/*.png
+!ios/**/*.png
+!macos/**/*.png
+!web/**/*.png
+
 # Tracking / project management
 docs/issues/
 CON
