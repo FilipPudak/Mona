@@ -11,11 +11,14 @@ class Period extends HiveObject {
   @HiveField(0)
   DateTime startedDate;
 
-  /// Days elapsed since [startedDate] toward the next period.
-  /// `0` = day 1 of the cycle. `-1` means the record is pending / not yet
-  /// counted. Unused by the UI in v1; day X is computed at read time.
-  @HiveField(1)
-  int currentDayCounter = -1;
+  @HiveField(2, defaultValue: 'automatic')
+  String trackingMode = 'automatic';
+
+  @HiveField(3, defaultValue: 28)
+  int manualCycleLength = 28;
+
+  @HiveField(4, defaultValue: 2)
+  int reminderDaysBefore = 2;
 
   Period({required this.startedDate});
 }

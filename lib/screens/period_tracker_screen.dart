@@ -7,6 +7,7 @@ import '../services/period_repository.dart';
 import '../widgets/day_counter.dart';
 import '../widgets/period_list_picker.dart';
 import 'history_screen.dart';
+import 'settings_screen.dart';
 
 class PeriodTrackerScreen extends StatefulWidget {
   const PeriodTrackerScreen({super.key});
@@ -123,6 +124,17 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
       appBar: AppBar(
         title: const Text('Mona'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const SettingsScreen(),
+                ),
+              );
+              if (mounted) setState(() {});
+            },
+          ),
           TextButton(
             onPressed: () async {
               await Navigator.of(context).push(

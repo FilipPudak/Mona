@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
 import 'package:mona/main.dart';
 import 'package:mona/models/period.dart';
 import 'package:mona/services/period_repository.dart';
+import 'package:mona/screens/settings_screen.dart';
 
 void main() {
   setUp(() async {
@@ -27,6 +29,27 @@ void main() {
     await tester.pump();
 
     expect(find.text('Mona'), findsOneWidget);
+  });
+
+  testWidgets('App bar has gear icon for settings', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    expect(find.byIcon(Icons.settings), findsOneWidget);
+  });
+
+  testWidgets('Settings screen shows tracking mode options',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: SettingsScreen()),
+    );
+    await tester.pump();
+
+    expect(find.text('Tracking mode'), findsOneWidget);
+    expect(find.text('Cycle length'), findsAtLeastNWidgets(1));
+    expect(find.text('Reminder'), findsAtLeastNWidgets(1));
+    expect(find.text('Notifications'), findsAtLeastNWidgets(1));
+    expect(find.text('Your data stays on this device.'), findsOneWidget);
   });
 
   testWidgets('Empty state shows prompt and no day counter',

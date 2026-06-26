@@ -15,6 +15,31 @@ class PeriodRepository {
 
   final Box<Period> _box;
 
+  String get trackingMode => currentPeriod()?.trackingMode ?? 'automatic';
+  int get manualCycleLength => currentPeriod()?.manualCycleLength ?? 28;
+  int get reminderDaysBefore => currentPeriod()?.reminderDaysBefore ?? 2;
+
+  Future<void> setTrackingMode(String value) async {
+    final period = currentPeriod();
+    if (period == null) return;
+    period.trackingMode = value;
+    await period.save();
+  }
+
+  Future<void> setManualCycleLength(int value) async {
+    final period = currentPeriod();
+    if (period == null) return;
+    period.manualCycleLength = value;
+    await period.save();
+  }
+
+  Future<void> setReminderDaysBefore(int value) async {
+    final period = currentPeriod();
+    if (period == null) return;
+    period.reminderDaysBefore = value;
+    await period.save();
+  }
+
   /// Returns the most recent period, or `null` if none has been recorded.
   Period? currentPeriod() {
     if (_box.isEmpty) return null;

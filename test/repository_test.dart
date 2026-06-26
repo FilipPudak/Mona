@@ -133,6 +133,43 @@ void main() {
     });
   });
 
+  group('settings defaults', () {
+    test('returns defaults when no periods exist', () {
+      expect(repo.trackingMode, 'automatic');
+      expect(repo.manualCycleLength, 28);
+      expect(repo.reminderDaysBefore, 2);
+    });
+
+    test('reads from current period when one exists', () async {
+      final p = Period(startedDate: DateTime(2026, 6, 1));
+      p.trackingMode = 'manual';
+      p.manualCycleLength = 35;
+      p.reminderDaysBefore = 3;
+      await box.add(p);
+      expect(repo.trackingMode, 'manual');
+      expect(repo.manualCycleLength, 35);
+      expect(repo.reminderDaysBefore, 3);
+    });
+
+    test('setter updates trackingMode on current period', () async {
+      await repo.recordPeriodStart(DateTime(2026, 6, 1));
+      await repo.setTrackingMode('manual');
+      expect(repo.trackingMode, 'manual');
+    });
+
+    test('setter updates manualCycleLength on current period', () async {
+      await repo.recordPeriodStart(DateTime(2026, 6, 1));
+      await repo.setManualCycleLength(35);
+      expect(repo.manualCycleLength, 35);
+    });
+
+    test('setter updates reminderDaysBefore on current period', () async {
+      await repo.recordPeriodStart(DateTime(2026, 6, 1));
+      await repo.setReminderDaysBefore(3);
+      expect(repo.reminderDaysBefore, 3);
+    });
+  });
+
   group('nextReminderDate', () {
     test('returns start + 26 days at 09:00', () {
       final start = DateTime(2026, 6, 1);

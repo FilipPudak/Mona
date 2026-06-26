@@ -18,17 +18,24 @@ class PeriodAdapter extends TypeAdapter<Period> {
     };
     return Period(
       startedDate: fields[0] as DateTime,
-    )..currentDayCounter = fields[1] as int;
+    )
+      ..trackingMode = fields[2] == null ? 'automatic' : fields[2] as String
+      ..manualCycleLength = fields[3] == null ? 28 : fields[3] as int
+      ..reminderDaysBefore = fields[4] == null ? 2 : fields[4] as int;
   }
 
   @override
   void write(BinaryWriter writer, Period obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.startedDate)
-      ..writeByte(1)
-      ..write(obj.currentDayCounter);
+      ..writeByte(2)
+      ..write(obj.trackingMode)
+      ..writeByte(3)
+      ..write(obj.manualCycleLength)
+      ..writeByte(4)
+      ..write(obj.reminderDaysBefore);
   }
 
   @override
