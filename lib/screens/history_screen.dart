@@ -33,9 +33,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Set<DateTime> _loggedDates() {
     final box = Hive.box<Period>(PeriodRepository.boxName);
-    return box.values.map((p) =>
-      DateTime(p.startedDate.year, p.startedDate.month, p.startedDate.day)
-    ).toSet();
+    return box.values
+        .map((p) => DateTime(
+            p.startedDate.year, p.startedDate.month, p.startedDate.day))
+        .toSet();
   }
 
   Future<void> _onAddPastPeriod() async {
@@ -80,7 +81,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     setState(() => _entries.insert(0, saved));
     messenger.showSnackBar(
       SnackBar(
-        content: Text('Logged period for ${picked.toLocal().toString().split(' ').first}.'),
+        content: Text(
+            'Logged period for ${picked.toLocal().toString().split(' ').first}.'),
         duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
         persist: false,
@@ -158,7 +160,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
     messenger.showSnackBar(
       SnackBar(
-        content: Text('Updated to ${picked.toLocal().toString().split(' ').first}.'),
+        content:
+            Text('Updated to ${picked.toLocal().toString().split(' ').first}.'),
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
       ),
@@ -231,7 +234,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           TextButton(
             onPressed: _onAddPastPeriod,
             style: TextButton.styleFrom(foregroundColor: Colors.black87),
-            child: const Text('+', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w300)),
+            child: const Text('+',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w300)),
           ),
         ],
       ),
@@ -253,19 +257,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       color: Colors.red.shade400,
                       child: Text(
                         isLatest ? 'Active' : 'Delete',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w500),
                       ),
                     ),
-                    confirmDismiss: isLatest ? (_) async {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Cannot delete the active period.'),
-                          duration: Duration(seconds: 2),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                      return false;
-                    } : null,
+                    confirmDismiss: isLatest
+                        ? (_) async {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('Cannot delete the active period.'),
+                                duration: Duration(seconds: 2),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            return false;
+                          }
+                        : null,
                     onDismissed: (_) => _onDeletePeriod(period),
                     child: PeriodRow(
                       period: period,

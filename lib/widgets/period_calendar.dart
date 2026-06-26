@@ -14,7 +14,8 @@ class PeriodCalendar extends StatefulWidget {
   final Set<DateTime> loggedDates;
   final DateTime? selectedDate;
 
-  static Future<DateTime?> show(BuildContext context, {
+  static Future<DateTime?> show(
+    BuildContext context, {
     required DateTime firstDate,
     required DateTime lastDate,
     Set<DateTime> loggedDates = const {},
@@ -42,18 +43,35 @@ class _PeriodCalendarState extends State<PeriodCalendar> {
   late DateTime _today;
 
   static const List<String> _months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   static const List<String> _shortWeekdays = [
-    'M', 'T', 'W', 'T', 'F', 'S', 'S',
+    'M',
+    'T',
+    'W',
+    'T',
+    'F',
+    'S',
+    'S',
   ];
 
   @override
   void initState() {
     super.initState();
-    _today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    _today =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     _selected = widget.selectedDate;
     _viewMonth = widget.selectedDate ?? _today;
   }
@@ -66,7 +84,7 @@ class _PeriodCalendarState extends State<PeriodCalendar> {
 
   bool _isLogged(DateTime date) {
     return widget.loggedDates.any((d) =>
-      d.year == date.year && d.month == date.month && d.day == date.day);
+        d.year == date.year && d.month == date.month && d.day == date.day);
   }
 
   void _prevMonth() {
@@ -107,7 +125,8 @@ class _PeriodCalendarState extends State<PeriodCalendar> {
                   onTap: _prevMonth,
                   child: const Padding(
                     padding: EdgeInsets.all(8),
-                    child: Text('<', style: TextStyle(color: Colors.black54, fontSize: 18)),
+                    child: Text('<',
+                        style: TextStyle(color: Colors.black54, fontSize: 18)),
                   ),
                 ),
                 Expanded(
@@ -124,20 +143,24 @@ class _PeriodCalendarState extends State<PeriodCalendar> {
                   onTap: _nextMonth,
                   child: const Padding(
                     padding: EdgeInsets.all(8),
-                    child: Text('>', style: TextStyle(color: Colors.black54, fontSize: 18)),
+                    child: Text('>',
+                        style: TextStyle(color: Colors.black54, fontSize: 18)),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Row(
-              children: _shortWeekdays.map((d) => Expanded(
-                child: Text(
-                  d,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.black54, fontSize: 13),
-                ),
-              )).toList(),
+              children: _shortWeekdays
+                  .map((d) => Expanded(
+                        child: Text(
+                          d,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              color: Colors.black54, fontSize: 13),
+                        ),
+                      ))
+                  .toList(),
             ),
             const SizedBox(height: 4),
             ...List.generate(
@@ -149,7 +172,8 @@ class _PeriodCalendarState extends State<PeriodCalendar> {
                     if (day < 1 || day > daysInMonth) {
                       return const Expanded(child: SizedBox(height: 40));
                     }
-                    final date = DateTime(_viewMonth.year, _viewMonth.month, day);
+                    final date =
+                        DateTime(_viewMonth.year, _viewMonth.month, day);
                     final disabled = _isDisabled(date);
                     final logged = _isLogged(date);
                     final selected = _selected != null &&
@@ -163,13 +187,18 @@ class _PeriodCalendarState extends State<PeriodCalendar> {
                         onTap: disabled
                             ? null
                             : () {
-                                if (logged && (widget.selectedDate == null ||
-                                    !(widget.selectedDate!.year == date.year &&
-                                      widget.selectedDate!.month == date.month &&
-                                      widget.selectedDate!.day == date.day))) {
+                                if (logged &&
+                                    (widget.selectedDate == null ||
+                                        !(widget.selectedDate!.year ==
+                                                date.year &&
+                                            widget.selectedDate!.month ==
+                                                date.month &&
+                                            widget.selectedDate!.day ==
+                                                date.day))) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('Already logged on ${_months[date.month - 1]} $day.'),
+                                      content: Text(
+                                          'Already logged on ${_months[date.month - 1]} $day.'),
                                       duration: const Duration(seconds: 2),
                                       behavior: SnackBarBehavior.floating,
                                     ),
@@ -199,7 +228,9 @@ class _PeriodCalendarState extends State<PeriodCalendar> {
                                           ? Colors.black26
                                           : Colors.black87,
                                   fontSize: 14,
-                                  fontWeight: today && !selected ? FontWeight.w600 : null,
+                                  fontWeight: today && !selected
+                                      ? FontWeight.w600
+                                      : null,
                                 ),
                               ),
                               if (logged)
@@ -208,7 +239,8 @@ class _PeriodCalendarState extends State<PeriodCalendar> {
                                   height: 4,
                                   margin: const EdgeInsets.only(top: 2),
                                   decoration: BoxDecoration(
-                                    color: selected ? Colors.white : Colors.purple,
+                                    color:
+                                        selected ? Colors.white : Colors.purple,
                                     shape: BoxShape.circle,
                                   ),
                                 )

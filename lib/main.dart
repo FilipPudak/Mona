@@ -39,23 +39,24 @@ class MyApp extends StatelessWidget {
         textScaler: const TextScaler.linear(1.25),
       ),
       child: MaterialApp(
-      title: 'Mona',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.purple,
-          brightness: Brightness.light,
+        title: 'Mona',
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.purple,
+            brightness: Brightness.light,
+          ),
+          fontFamily: 'ISOCPEUR',
+          scaffoldBackgroundColor:
+              const Color(0xFFF5F7FA), // Light Nordic gray-white
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black87,
+            elevation: 1,
+          ),
         ),
-        fontFamily: 'ISOCPEUR',
-        scaffoldBackgroundColor: const Color(0xFFF5F7FA), // Light Nordic gray-white
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          elevation: 1,
-        ),
+        home: const PeriodTrackerScreen(),
       ),
-      home: const PeriodTrackerScreen(),
-    ),
     );
   }
 }

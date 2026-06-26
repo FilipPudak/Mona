@@ -167,7 +167,8 @@ void main() {
     expect(find.text('Log your new period.'), findsOneWidget);
   });
 
-  testWidgets('Settings: notifications switch toggles', (WidgetTester tester) async {
+  testWidgets('Settings: notifications switch toggles',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
@@ -194,7 +195,8 @@ void main() {
     expect(find.text('No periods logged yet.'), findsOneWidget);
   });
 
-  testWidgets('History shows period rows when periods exist', (WidgetTester tester) async {
+  testWidgets('History shows period rows when periods exist',
+      (WidgetTester tester) async {
     await tester.runAsync(() async {
       final box = Hive.box<Period>('periods');
       await box.add(Period(startedDate: DateTime(2026, 6, 1)));
@@ -209,8 +211,11 @@ void main() {
     expect(find.byType(PeriodRow), findsOneWidget);
   });
 
-  testWidgets('Log period: Start button opens picker', (WidgetTester tester) async {
-    addTearDown(() async { await tester.binding.setSurfaceSize(Size.zero); });
+  testWidgets('Log period: Start button opens picker',
+      (WidgetTester tester) async {
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(Size.zero);
+    });
     await tester.binding.setSurfaceSize(const Size(800, 1000));
 
     await tester.pumpWidget(const MyApp());
@@ -227,8 +232,18 @@ void main() {
 
 String _monthName(int month) {
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   return months[month - 1];
 }

@@ -11,7 +11,6 @@ class PeriodRepository {
 
   static const String boxName = 'periods';
 
-
   final Box<Period> _box;
 
   int get periodCount => _box.values.length;
@@ -102,14 +101,16 @@ class PeriodRepository {
   /// that day was already present.
   Future<Period?> recordPeriodStart(DateTime date) async {
     if (hasPeriodOn(date)) return null;
-    final period = Period(startedDate: DateTime(date.year, date.month, date.day));
+    final period =
+        Period(startedDate: DateTime(date.year, date.month, date.day));
     await _box.add(period);
     return period;
   }
 
   /// Cycle day (1-based) for [today] given a period starting on [start].
   /// Clamped to 1..[cycleLength]. Default cap is 28 when not specified.
-  static int dayOfCycle(DateTime start, DateTime today, {int cycleLength = 28}) {
+  static int dayOfCycle(DateTime start, DateTime today,
+      {int cycleLength = 28}) {
     final startDay = DateTime(start.year, start.month, start.day);
     final todayDay = DateTime(today.year, today.month, today.day);
     final diff = todayDay.difference(startDay).inDays + 1;
@@ -120,7 +121,8 @@ class PeriodRepository {
 
   /// Date/time at which the next reminder should fire: 09:00 local on
   /// `start + (cycleLength - reminderDaysBefore)`.
-  static DateTime nextReminderDate(DateTime start, {int cycleLength = 28, int reminderDaysBefore = 2}) {
+  static DateTime nextReminderDate(DateTime start,
+      {int cycleLength = 28, int reminderDaysBefore = 2}) {
     final reminderDay = cycleLength - reminderDaysBefore;
     final day = DateTime(start.year, start.month, start.day)
         .add(Duration(days: reminderDay));

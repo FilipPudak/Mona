@@ -70,7 +70,8 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
       setState(() {});
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Logged period for ${picked.toLocal().toString().split(' ').first}.'),
+          content: Text(
+              'Logged period for ${picked.toLocal().toString().split(' ').first}.'),
           duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
           persist: false,
@@ -104,7 +105,8 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     final day = period == null
         ? 0
         : PeriodRepository.dayOfCycle(
-            period.startedDate, today,
+            period.startedDate,
+            today,
             cycleLength: cycleLength,
           );
 
@@ -127,8 +129,18 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
       final diff = today.difference(dueDate).inDays;
       if (diff < 0) {
         const months = [
-          'January', 'February', 'March', 'April', 'May', 'June',
-          'July', 'August', 'September', 'October', 'November', 'December',
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
         ];
         caption = 'Next: ${months[dueDate.month - 1]} ${dueDate.day}';
       } else if (diff <= 7) {
@@ -188,23 +200,23 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
               SizedBox(
                 width: double.infinity,
                 height: 56,
-                  child: FilledButton(
-                    onPressed: _onLogPeriod,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
-                      side: const BorderSide(color: Colors.black12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'ISOCPEUR',
-                      ),
+                child: FilledButton(
+                  onPressed: _onLogPeriod,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black87,
+                    side: const BorderSide(color: Colors.black12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text('Start'),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'ISOCPEUR',
+                    ),
                   ),
+                  child: const Text('Start'),
+                ),
               ),
               const SizedBox(height: 32),
             ],

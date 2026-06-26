@@ -10,7 +10,8 @@ class PeriodListPicker extends StatefulWidget {
   final DateTime firstDate;
   final DateTime lastDate;
 
-  static Future<DateTime?> show(BuildContext context, {
+  static Future<DateTime?> show(
+    BuildContext context, {
     required DateTime firstDate,
     required DateTime lastDate,
   }) {
@@ -35,21 +36,34 @@ class _PeriodListPickerState extends State<PeriodListPicker> {
   void initState() {
     super.initState();
     final days = widget.lastDate.difference(widget.firstDate).inDays;
-    _dates = List.generate(days + 1, (i) => widget.lastDate.subtract(Duration(days: i)));
+    _dates = List.generate(
+        days + 1, (i) => widget.lastDate.subtract(Duration(days: i)));
     _selected = widget.lastDate;
   }
 
   String _label(DateTime date) {
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-    final diff = today.difference(DateTime(date.year, date.month, date.day)).inDays;
+    final today =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final diff =
+        today.difference(DateTime(date.year, date.month, date.day)).inDays;
     if (diff == 0) return 'Today';
     if (diff == 1) return 'Yesterday';
     return '$diff days ago';
   }
 
   static const List<String> _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   String _dateString(DateTime d) {
