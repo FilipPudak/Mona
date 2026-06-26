@@ -142,7 +142,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('$cycleLength days'),
+                      Text('$cycleLength days',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600)),
                       const SizedBox(width: 4),
                       GestureDetector(
                         onTap: _onInfoTap,
@@ -154,7 +156,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('$manualLength days'),
+                      Text('$manualLength days',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600)),
                       const Icon(Icons.chevron_right),
                     ],
                   ),
@@ -167,7 +171,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('$reminderDays day${reminderDays == 1 ? '' : 's'} before'),
+                Text('$reminderDays day${reminderDays == 1 ? '' : 's'} before',
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600)),
                 const Icon(Icons.chevron_right),
               ],
             ),
