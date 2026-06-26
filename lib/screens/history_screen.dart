@@ -64,9 +64,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
       return;
     }
 
-    final nextReminder = PeriodRepository.nextReminderDate(picked);
+    final nextReminder = PeriodRepository.nextReminderDate(
+      picked,
+      cycleLength: _repo.currentCycleLength(),
+      reminderDaysBefore: _repo.reminderDaysBefore,
+    );
     if (!nextReminder.isBefore(DateTime.now())) {
-      await NotificationService.instance.scheduleReminder(nextReminder);
+      await NotificationService.instance.scheduleReminder(
+        nextReminder,
+        reminderDaysBefore: _repo.reminderDaysBefore,
+      );
     }
 
     if (!mounted) return;
@@ -130,9 +137,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     final current = _repo.currentPeriod();
     if (current != null) {
-      final nextReminder = PeriodRepository.nextReminderDate(current.startedDate);
+      final nextReminder = PeriodRepository.nextReminderDate(
+        current.startedDate,
+        cycleLength: _repo.currentCycleLength(),
+        reminderDaysBefore: _repo.reminderDaysBefore,
+      );
       if (!nextReminder.isBefore(DateTime.now())) {
-        await NotificationService.instance.scheduleReminder(nextReminder);
+        await NotificationService.instance.scheduleReminder(
+          nextReminder,
+          reminderDaysBefore: _repo.reminderDaysBefore,
+        );
       }
     }
 
@@ -158,9 +172,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     final current = _repo.currentPeriod();
     if (current != null) {
-      final nextReminder = PeriodRepository.nextReminderDate(current.startedDate);
+      final nextReminder = PeriodRepository.nextReminderDate(
+        current.startedDate,
+        cycleLength: _repo.currentCycleLength(),
+        reminderDaysBefore: _repo.reminderDaysBefore,
+      );
       if (!nextReminder.isBefore(DateTime.now())) {
-        await NotificationService.instance.scheduleReminder(nextReminder);
+        await NotificationService.instance.scheduleReminder(
+          nextReminder,
+          reminderDaysBefore: _repo.reminderDaysBefore,
+        );
       }
     } else {
       await NotificationService.instance.cancelReminder();
@@ -181,9 +202,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
             final restored = Period(startedDate: period.startedDate);
             await box.add(restored);
 
-            final nextReminder = PeriodRepository.nextReminderDate(restored.startedDate);
+            final nextReminder = PeriodRepository.nextReminderDate(
+              restored.startedDate,
+              cycleLength: _repo.currentCycleLength(),
+              reminderDaysBefore: _repo.reminderDaysBefore,
+            );
             if (!nextReminder.isBefore(DateTime.now())) {
-              await NotificationService.instance.scheduleReminder(nextReminder);
+              await NotificationService.instance.scheduleReminder(
+                nextReminder,
+                reminderDaysBefore: _repo.reminderDaysBefore,
+              );
             }
 
             if (!mounted) return;

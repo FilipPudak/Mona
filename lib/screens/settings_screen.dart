@@ -67,9 +67,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (on) {
       final period = _repo.currentPeriod();
       if (period != null) {
-        final nextReminder = PeriodRepository.nextReminderDate(period.startedDate);
+        final nextReminder = PeriodRepository.nextReminderDate(
+          period.startedDate,
+          cycleLength: _repo.currentCycleLength(),
+          reminderDaysBefore: _repo.reminderDaysBefore,
+        );
         if (!nextReminder.isBefore(DateTime.now())) {
-          NotificationService.instance.scheduleReminder(nextReminder);
+          NotificationService.instance.scheduleReminder(
+            nextReminder,
+            reminderDaysBefore: _repo.reminderDaysBefore,
+          );
         }
       }
     } else {

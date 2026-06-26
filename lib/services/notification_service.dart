@@ -54,7 +54,7 @@ class NotificationService {
 
   /// Cancel any previously scheduled reminder and schedule a new one at [when].
   /// If [when] is in the past, this is a no-op (we don't fire stale reminders).
-  Future<void> scheduleReminder(DateTime when) async {
+  Future<void> scheduleReminder(DateTime when, {int reminderDaysBefore = 2}) async {
     await init();
     await _plugin.cancel(_reminderId);
 
@@ -71,11 +71,12 @@ class NotificationService {
     const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
 
     final scheduled = tz.TZDateTime.from(when, tz.local);
+    final message = 'Your period may start in $reminderDaysBefore day${reminderDaysBefore == 1 ? '' : 's'}.';
 
     await _plugin.zonedSchedule(
       _reminderId,
       'Period reminder',
-      'Your period may start in 2 days.',
+      message,
       scheduled,
       details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

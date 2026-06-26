@@ -54,9 +54,16 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
         return;
       }
 
-      final nextReminder = PeriodRepository.nextReminderDate(picked);
+      final nextReminder = PeriodRepository.nextReminderDate(
+        picked,
+        cycleLength: _repo.currentCycleLength(),
+        reminderDaysBefore: _repo.reminderDaysBefore,
+      );
       if (!nextReminder.isBefore(DateTime.now())) {
-        await NotificationService.instance.scheduleReminder(nextReminder);
+        await NotificationService.instance.scheduleReminder(
+          nextReminder,
+          reminderDaysBefore: _repo.reminderDaysBefore,
+        );
       }
 
       if (!mounted) return;

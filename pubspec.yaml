@@ -1,5 +1,5 @@
 name: mona
-description: A period tracking app with 28-day cycle notifications.
+description: A period tracking app with manual and automatic cycle predictions.
 
 publish_to: 'none'
 

@@ -10,7 +10,7 @@ class PeriodRepository {
   PeriodRepository(this._box);
 
   static const String boxName = 'periods';
-  static const int reminderOffsetDays = 26; // 2 days before day 28
+
 
   final Box<Period> _box;
 
@@ -118,10 +118,11 @@ class PeriodRepository {
   }
 
   /// Date/time at which the next reminder should fire: 09:00 local on
-  /// `start + reminderOffsetDays`.
-  static DateTime nextReminderDate(DateTime start) {
+  /// `start + (cycleLength - reminderDaysBefore)`.
+  static DateTime nextReminderDate(DateTime start, {int cycleLength = 28, int reminderDaysBefore = 2}) {
+    final reminderDay = cycleLength - reminderDaysBefore;
     final day = DateTime(start.year, start.month, start.day)
-        .add(const Duration(days: reminderOffsetDays));
+        .add(Duration(days: reminderDay));
     return DateTime(day.year, day.month, day.day, 9);
   }
 }

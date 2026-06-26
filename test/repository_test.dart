@@ -277,10 +277,22 @@ void main() {
   });
 
   group('nextReminderDate', () {
-    test('returns start + 26 days at 09:00', () {
+    test('defaults to 28-day cycle, 2 days before', () {
       final start = DateTime(2026, 6, 1);
       final reminder = PeriodRepository.nextReminderDate(start);
+      // due = start + 28 = June 29, reminder = due - 2 = June 27
       expect(reminder, DateTime(2026, 6, 27, 9));
+    });
+
+    test('uses provided cycleLength and reminderDaysBefore', () {
+      final start = DateTime(2026, 6, 1);
+      final reminder = PeriodRepository.nextReminderDate(
+        start,
+        cycleLength: 35,
+        reminderDaysBefore: 3,
+      );
+      // due = start + 35 = July 6, reminder = due - 3 = July 3
+      expect(reminder, DateTime(2026, 7, 3, 9));
     });
   });
 }
