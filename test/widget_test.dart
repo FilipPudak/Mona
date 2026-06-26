@@ -95,6 +95,62 @@ void main() {
     expect(find.text('Period may start today.'), findsOneWidget);
   });
 
+  testWidgets('Day 1 shows rose phase color', (WidgetTester tester) async {
+    await tester.runAsync(() async {
+      final box = Hive.box<Period>('periods');
+      await box.add(Period(startedDate: DateTime.now()));
+    });
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    final text = tester.widget<Text>(find.text('1'));
+    expect(text.style?.color, const Color(0xFFE68192));
+  });
+
+  testWidgets('Day 12 shows green phase color', (WidgetTester tester) async {
+    final start = DateTime.now().subtract(const Duration(days: 11));
+    await tester.runAsync(() async {
+      final box = Hive.box<Period>('periods');
+      await box.add(Period(startedDate: start));
+    });
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    final text = tester.widget<Text>(find.text('12'));
+    expect(text.style?.color, Colors.green);
+  });
+
+  testWidgets('Day 18 shows default black color', (WidgetTester tester) async {
+    final start = DateTime.now().subtract(const Duration(days: 17));
+    await tester.runAsync(() async {
+      final box = Hive.box<Period>('periods');
+      await box.add(Period(startedDate: start));
+    });
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    final text = tester.widget<Text>(find.text('18'));
+    expect(text.style?.color, Colors.black87);
+  });
+
+  testWidgets('Day counter capped at cycle length when overdue',
+      (WidgetTester tester) async {
+    final start = DateTime.now().subtract(const Duration(days: 35));
+    await tester.runAsync(() async {
+      final box = Hive.box<Period>('periods');
+      await box.add(Period(startedDate: start));
+    });
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    expect(find.text('28'), findsOneWidget);
+    expect(find.text('36'), findsNothing);
+  });
+
   testWidgets('Overdue shows "Log your new period."',
       (WidgetTester tester) async {
     final now = DateTime.now();
