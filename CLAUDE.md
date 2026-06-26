@@ -50,6 +50,10 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 
 ### All PRD items implemented
 
+## Pre-commit Checks
+- Run `scripts/pre-commit` before every commit: `dart format`, `flutter analyze`, `flutter test`
+- Install the hook: `Copy-Item scripts/pre-commit .git/hooks/pre-commit -Force` (Windows) or `cp scripts/pre-commit .git/hooks/pre-commit` (macOS/Linux)
+
 ## Build Scripts
 - `scripts/build_ios.sh` — builds a debug `.ipa` for SideStore deployment (run on macOS)
 
