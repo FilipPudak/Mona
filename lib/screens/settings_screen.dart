@@ -29,7 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _showCycleLengthPicker() async {
     final current = _repo.manualCycleLength;
-    final picked = await showModalBottomSheet<int>(
+    await showModalBottomSheet<int>(
       context: context,
       builder: (ctx) => _NumberPickerSheet(
         title: 'Cycle length',
