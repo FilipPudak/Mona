@@ -4,7 +4,7 @@
 Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, restrained purple seed color. Segoe UI typography.
 
 ## Tech Stack
-- Flutter 3.44.1 (Windows/Android), 3.27.4 (macOS/iOS), Dart 3.x
+- Flutter 3.38.10 (all platforms), Dart 3.x
 - Local-only: Hive (no accounts, network, analytics)
 - Notifications: flutter_local_notifications
 - Target: Android (emulator sdk gphone16k x86 64, API 37)
