@@ -1,19 +1,25 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:meta/meta.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 import 'device_timezone.dart';
 
 /// Schedules and cancels the "period in 2 days" reminder.
 class NotificationService {
-  NotificationService._();
+  NotificationService._({FlutterLocalNotificationsPlugin? plugin})
+      : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+
+  @visibleForTesting
+  NotificationService.testing({FlutterLocalNotificationsPlugin? plugin})
+      : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+
   static final NotificationService instance = NotificationService._();
 
   static const String _channelId = 'period_reminder';
   static const String _channelName = 'Period reminders';
   static const int _reminderId = 1001;
 
-  final FlutterLocalNotificationsPlugin _plugin =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin;
 
   bool _initialized = false;
 
