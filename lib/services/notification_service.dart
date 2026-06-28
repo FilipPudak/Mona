@@ -1,7 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
+import 'device_timezone.dart';
 
 /// Schedules and cancels the "period in 2 days" reminder.
 class NotificationService {
@@ -24,7 +24,7 @@ class NotificationService {
 
     tz_data.initializeTimeZones();
     try {
-      final timezoneName = await FlutterTimezone.getLocalTimezone();
+      final timezoneName = await DeviceTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(timezoneName));
     } catch (_) {
       // Fall back to UTC if the platform can't tell us the zone; scheduling
