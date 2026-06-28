@@ -2,21 +2,13 @@ import Flutter
 import UIKit
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
-  override var engine: FlutterEngine? {
-    return (window?.rootViewController as? FlutterViewController)?.engine
-  }
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
-  override func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-  ) -> Bool {
-    GeneratedPluginRegistrant.register(with: self)
-
-    let controller = window?.rootViewController as! FlutterViewController
     let channel = FlutterMethodChannel(
       name: "device_timezone",
-      binaryMessenger: controller.binaryMessenger
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
     )
     channel.setMethodCallHandler { call, result in
       if call.method == "getLocalTimezone" {
@@ -25,7 +17,12 @@ import UIKit
         result.notImplemented()
       }
     }
+  }
 
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
