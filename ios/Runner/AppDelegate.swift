@@ -3,6 +3,10 @@ import UIKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
+  override var engine: FlutterEngine? {
+    return (window?.rootViewController as? FlutterViewController)?.engine
+  }
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
