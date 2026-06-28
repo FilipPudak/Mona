@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/mona_icon.png" alt="Mona icon" width="128">
+  <img src="assets/mona_icon_foreground.png" alt="Mona icon" width="256">
 </p>
 
 # Mona
