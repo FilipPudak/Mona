@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
@@ -118,21 +119,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           const _SectionHeader(title: 'Tracking mode'),
-          RadioGroup<String>(
+          RadioListTile<String>(
+            title: const Text('Automatic (learns from cycles)'),
+            value: 'automatic',
             groupValue: trackingMode,
             onChanged: (v) => v != null ? _setTrackingMode(v) : null,
-            child: const Column(
-              children: [
-                RadioListTile<String>(
-                  title: Text('Automatic (learns from cycles)'),
-                  value: 'automatic',
-                ),
-                RadioListTile<String>(
-                  title: Text('Manual (fixed length)'),
-                  value: 'manual',
-                ),
-              ],
-            ),
+          ),
+          RadioListTile<String>(
+            title: const Text('Manual (fixed length)'),
+            value: 'manual',
+            groupValue: trackingMode,
+            onChanged: (v) => v != null ? _setTrackingMode(v) : null,
           ),
           const Divider(height: 1),
           const _SectionHeader(title: 'Cycle length'),
