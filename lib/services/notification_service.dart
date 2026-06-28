@@ -24,8 +24,8 @@ class NotificationService {
 
     tz_data.initializeTimeZones();
     try {
-      final info = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(info.identifier));
+      final timezoneName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timezoneName));
     } catch (_) {
       // Fall back to UTC if the platform can't tell us the zone; scheduling
       // will still work, just potentially off-by-zone.
