@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
             seedColor: Colors.purple,
             brightness: Brightness.light,
           ),
-          fontFamily: 'ISOCPEUR',
+          fontFamily: 'Segoe UI',
           scaffoldBackgroundColor:
               const Color(0xFFF5F7FA), // Light Nordic gray-white
           appBarTheme: const AppBarTheme(

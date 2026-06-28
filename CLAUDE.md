@@ -1,7 +1,7 @@
 # Mona — Period Tracker
 
 ## Design
-Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, restrained purple seed color. ISOCPEUR typography.
+Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, restrained purple seed color. Segoe UI typography.
 
 ## Tech Stack
 - Flutter 3.44.1, Dart 3.x
@@ -23,11 +23,11 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - Main screen: day counter (capped at cycle length) + expected date caption ("Next: June 28"), "Period may start today" through due+7d, then "Log your new period"
 - Day number: 50% bigger than default (1.5x textScaler override on top of 1.25x global)
 - Global text scaling: 125% via `TextScaler.linear(1.25)` in `MediaQuery`
-- Font: ISOCPEUR, bundled at `fonts/ISOCPEUR.ttf`
+- Font: Segoe UI (system font on Windows)
 - `startedDate` on Period model is mutable (not final)
 - No future dates or today in calendar; today logged from main screen button
-- `FilledButton.styleFrom(textStyle: ...)` must include `fontFamily: 'ISOCPEUR'`
-- `ThemeData.fontFamily: 'ISOCPEUR'` in main.dart
+- `FilledButton.styleFrom(textStyle: ...)` must include `fontFamily: 'Segoe UI'`
+- `ThemeData.fontFamily: 'Segoe UI'` in main.dart
 - Settings gear icon in app bar; radio buttons for tracking mode; cycle length picker bounded 21–45; reminder picker 1–5 days; notifications toggle cancels/reschedules
 
 ## Project State
@@ -40,8 +40,8 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - Day counter shows just day number with color parameter (`lib/widgets/day_counter.dart`)
 - Period model with mutable `startedDate` (`lib/models/period.dart`)
 - Const lint fix (`lib/services/period_repository.dart`)
-- Global font via `ThemeData.fontFamily` + font bundle in `pubspec.yaml`
-- Explicit `fontFamily: 'ISOCPEUR'` on FilledButton text style
+- Global font via `ThemeData.fontFamily` in `main.dart`
+- Explicit `fontFamily: 'Segoe UI'` on FilledButton text style
 - Global 125% text scaling via `MediaQuery(textScaler: TextScaler.linear(1.25))`
 - Button text: "Start"
 - `persist: false` on all action SnackBars
@@ -69,7 +69,7 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - `lib/services/notification_service.dart`
 - `lib/main.dart`
 - `pubspec.yaml`
-- `fonts/ISOCPEUR.ttf`
+- `fonts/ISOCPEUR.ttf` (replaced by system Segoe UI)
 - `docs/PRD.md`
 - `docs/ProductBrief.md`
 

@@ -212,7 +212,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
                     textStyle: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      fontFamily: 'ISOCPEUR',
+                      fontFamily: 'Segoe UI',
                     ),
                   ),
                   child: const Text('Start'),

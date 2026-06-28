@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/mona_icon.png" alt="Mona icon" width="128">
+</p>
+
 # Mona
 
 A Scandinavian-minimal Flutter period tracker. Local-only, private, no accounts, no network.

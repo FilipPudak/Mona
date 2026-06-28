@@ -30,10 +30,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  fonts:
-    - family: ISOCPEUR
-      fonts:
-        - asset: fonts/ISOCPEUR.ttf
 
 flutter_launcher_icons:
   android: true
