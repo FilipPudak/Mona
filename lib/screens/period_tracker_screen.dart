@@ -6,6 +6,7 @@ import '../services/notification_service.dart';
 import '../services/period_repository.dart';
 import '../widgets/day_counter.dart';
 import '../widgets/period_list_picker.dart';
+import '../widgets/undo_snackbar.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
 
@@ -68,21 +69,14 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
 
       if (!mounted) return;
       setState(() {});
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-              'Logged period for ${picked.toLocal().toString().split(' ').first}.'),
-          duration: const Duration(seconds: 4),
-          behavior: SnackBarBehavior.floating,
-          persist: false,
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () async {
-              await saved.delete();
-              if (mounted) setState(() {});
-            },
-          ),
-        ),
+      showUndoSnackBar(
+        messenger: messenger,
+        message:
+            'Logged period for ${picked.toLocal().toString().split(' ').first}.',
+        onUndo: () {
+          saved.delete();
+          if (mounted) setState(() {});
+        },
       );
     } catch (e, st) {
       debugPrint('PeriodTracker: log failed: $e\n$st');

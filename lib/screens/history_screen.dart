@@ -6,6 +6,7 @@ import '../services/notification_service.dart';
 import '../services/period_repository.dart';
 import '../widgets/period_calendar.dart';
 import '../widgets/period_row.dart';
+import '../widgets/undo_snackbar.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -79,22 +80,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     if (!mounted) return;
     setState(() => _entries.insert(0, saved));
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-            'Logged period for ${picked.toLocal().toString().split(' ').first}.'),
-        duration: const Duration(seconds: 4),
-        behavior: SnackBarBehavior.floating,
-        persist: false,
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () async {
-            await saved.delete();
-            if (!mounted) return;
-            setState(() => _entries = _repo.history());
-          },
-        ),
-      ),
+    showUndoSnackBar(
+      messenger: messenger,
+      message:
+          'Logged period for ${picked.toLocal().toString().split(' ').first}.',
+      onUndo: () {
+        saved.delete();
+        if (!mounted) return;
+        setState(() => _entries = _repo.history());
+      },
     );
   }
 
@@ -192,36 +186,29 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     if (!mounted) return;
     setState(() => _entries.removeWhere((p) => p.key == period.key));
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text('Deleted $dateStr.'),
-        duration: const Duration(seconds: 4),
-        behavior: SnackBarBehavior.floating,
-        persist: false,
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () async {
-            final box = Hive.box<Period>(PeriodRepository.boxName);
-            final restored = Period(startedDate: period.startedDate);
-            await box.add(restored);
+    showUndoSnackBar(
+      messenger: messenger,
+      message: 'Deleted $dateStr.',
+      onUndo: () async {
+        final box = Hive.box<Period>(PeriodRepository.boxName);
+        final restored = Period(startedDate: period.startedDate);
+        await box.add(restored);
 
-            final nextReminder = PeriodRepository.nextReminderDate(
-              restored.startedDate,
-              cycleLength: _repo.currentCycleLength(),
-              reminderDaysBefore: _repo.reminderDaysBefore,
-            );
-            if (!nextReminder.isBefore(DateTime.now())) {
-              await NotificationService.instance.scheduleReminder(
-                nextReminder,
-                reminderDaysBefore: _repo.reminderDaysBefore,
-              );
-            }
+        final nextReminder = PeriodRepository.nextReminderDate(
+          restored.startedDate,
+          cycleLength: _repo.currentCycleLength(),
+          reminderDaysBefore: _repo.reminderDaysBefore,
+        );
+        if (!nextReminder.isBefore(DateTime.now())) {
+          await NotificationService.instance.scheduleReminder(
+            nextReminder,
+            reminderDaysBefore: _repo.reminderDaysBefore,
+          );
+        }
 
-            if (!mounted) return;
-            setState(() => _entries = _repo.history());
-          },
-        ),
-      ),
+        if (!mounted) return;
+        setState(() => _entries = _repo.history());
+      },
     );
   }
 

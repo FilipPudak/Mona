@@ -4,7 +4,7 @@
 Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, restrained purple seed color. Segoe UI typography.
 
 ## Tech Stack
-- Flutter 3.44.1, Dart 3.x
+- Flutter 3.44.1 (Windows/Android), 3.27.4 (macOS/iOS), Dart 3.x
 - Local-only: Hive (no accounts, network, analytics)
 - Notifications: flutter_local_notifications
 - Target: Android (emulator sdk gphone16k x86 64, API 37)
@@ -18,7 +18,6 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - Swipe-to-delete on history rows (latest/active period protected)
 - Tap row to edit: opens calendar pre-selected to that record's date
 - SnackBar Undo after every log, delete, and edit action
-- All SnackBars with actions must set `persist: false` (Flutter 3.44 breaking change)
 - Cycle colors: day 1-6 #E68192, day 11-17 green, else black
 - Main screen: day counter (capped at cycle length) + expected date caption ("Next: June 28"), "Period may start today" through due+7d, then "Log your new period"
 - Day number: 50% bigger than default (1.5x textScaler override on top of 1.25x global)
@@ -44,7 +43,6 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - Explicit `fontFamily: 'Segoe UI'` on FilledButton text style
 - Global 125% text scaling via `MediaQuery(textScaler: TextScaler.linear(1.25))`
 - Button text: "Start"
-- `persist: false` on all action SnackBars
 - Main screen refreshes on return from history (await Navigator.push + setState)
 - Day number at 1.5x textScaler (via inner MediaQuery in `day_counter.dart`)
 
