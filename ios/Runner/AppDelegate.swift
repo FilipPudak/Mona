@@ -12,9 +12,9 @@ import UIKit
     )
     channel.setMethodCallHandler { call, result in
       if call.method == "getLocalTimezone" {
-        result.success(TimeZone.current.identifier)
+        result(TimeZone.current.identifier)
       } else {
-        result.notImplemented()
+        result(FlutterMethodNotImplemented)
       }
     }
   }
