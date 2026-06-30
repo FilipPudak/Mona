@@ -152,7 +152,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mona'),
+        title: const Text('Mona', style: TextStyle(color: Color(0xFFE68192))),
         actions: [
           TextButton(
             onPressed: () async {
