@@ -84,9 +84,9 @@
 
 **Cycle length row (automatic)** — Read-only. Shows the computed average without an arrow. A subtle info icon explains: "Based on your N recorded cycles."
 
-**Reminder days picker** — Scroll picker showing 1–5 days. Default 2.
+**Days before row** — "Days before" row within the Reminder section, showing the configured value. Disabled (gray, no chevron, not tappable) when notifications are OFF. Enabled when notifications are ON, opens a scroll picker (1–5 days). Default 2.
 
-**Notifications toggle** — ON/OFF switch. OFF cancels all pending reminders immediately. ON reschedules based on current data. The reminderDaysBefore config is preserved while OFF.
+**Notification toggle** — ON/OFF switch within the Reminder section. OFF cancels all pending reminders immediately. ON reschedules based on current data. The reminderDaysBefore config is preserved while OFF. Label is singular: "Notification".
 
 ## App
 

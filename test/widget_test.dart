@@ -49,7 +49,7 @@ void main() {
     expect(find.text('Tracking mode'), findsOneWidget);
     expect(find.text('Cycle length'), findsAtLeastNWidgets(1));
     expect(find.text('Reminder'), findsAtLeastNWidgets(1));
-    expect(find.text('Notifications'), findsAtLeastNWidgets(1));
+    expect(find.text('Notification'), findsAtLeastNWidgets(1));
     expect(find.text('Your data stays on this device.'), findsOneWidget);
   });
 
@@ -165,6 +165,56 @@ void main() {
     await tester.pump();
 
     expect(find.text('Log your new period.'), findsOneWidget);
+  });
+
+  testWidgets('Settings shows merged Reminder section with correct labels',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: SettingsScreen()),
+    );
+    await tester.pump();
+
+    expect(find.text('Reminder'), findsAtLeastNWidgets(1));
+    expect(find.text('Days before'), findsAtLeastNWidgets(1));
+    expect(find.text('Notification'), findsAtLeastNWidgets(1));
+    expect(find.text('Notifications'), findsNothing);
+  });
+
+  testWidgets('Days before row disabled when notifications OFF',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: SettingsScreen()),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.chevron_right), findsNothing);
+
+    await tester.tap(find.text('Days before'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListWheelScrollView), findsNothing);
+  });
+
+  testWidgets('Days before row enabled when notifications ON',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: SettingsScreen()),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.chevron_right), findsAtLeastNWidgets(1));
+
+    await tester.tap(find.text('Days before'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(ListWheelScrollView), findsOneWidget);
   });
 
   testWidgets('Settings: notifications switch toggles',

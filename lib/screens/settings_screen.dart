@@ -1,3 +1,4 @@
+// RadioGroup (replacement for RadioListTile.groupValue) requires Flutter ≥3.44
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -168,24 +169,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 1),
           const _SectionHeader(title: 'Reminder'),
           ListTile(
-            title: const Text('Reminder'),
+            title: Text('Days before',
+                style: TextStyle(
+                  color: _notificationsOn ? null : Colors.grey,
+                )),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text('$reminderDays day${reminderDays == 1 ? '' : 's'} before',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w600)),
-                const Icon(Icons.chevron_right),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: _notificationsOn ? null : Colors.grey,
+                        )),
+                if (_notificationsOn) const Icon(Icons.chevron_right),
               ],
             ),
-            onTap: _showReminderPicker,
+            onTap: _notificationsOn ? _showReminderPicker : null,
           ),
           const Divider(height: 1),
-          const _SectionHeader(title: 'Notifications'),
           SwitchListTile(
-            title: const Text('Notifications'),
+            title: const Text('Notification'),
             value: _notificationsOn,
             onChanged: _toggleNotifications,
           ),
