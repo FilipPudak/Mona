@@ -102,7 +102,7 @@ class PeriodRepository {
   Future<Period?> recordPeriodStart(DateTime date) async {
     if (hasPeriodOn(date)) return null;
     final period =
-        Period(startedDate: DateTime(date.year, date.month, date.day));
+        Period(startedDate: DateTime.utc(date.year, date.month, date.day));
     await _box.add(period);
     return period;
   }

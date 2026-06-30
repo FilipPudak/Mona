@@ -119,7 +119,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
     if (picked == null) return;
 
-    if (picked == period.startedDate) return;
+    if (picked.year == period.startedDate.year &&
+        picked.month == period.startedDate.month &&
+        picked.day == period.startedDate.day) {
+      return;
+    }
 
     if (_repo.hasPeriodOn(picked)) {
       if (!mounted) return;
@@ -133,7 +137,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       return;
     }
 
-    period.startedDate = picked;
+    period.startedDate = DateTime.utc(picked.year, picked.month, picked.day);
     await period.save();
 
     final current = _repo.currentPeriod();

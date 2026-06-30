@@ -88,7 +88,7 @@ void main() {
     test('saves a new period and returns it', () async {
       final saved = await repo.recordPeriodStart(DateTime(2026, 6, 1));
       expect(saved, isNotNull);
-      expect(saved!.startedDate, DateTime(2026, 6, 1));
+      expect(saved!.startedDate, DateTime.utc(2026, 6, 1));
       expect(box.length, 1);
     });
 
@@ -103,7 +103,7 @@ void main() {
       final saved = await repo.recordPeriodStart(
         DateTime(2026, 6, 1, 14, 30),
       );
-      expect(saved!.startedDate, DateTime(2026, 6, 1));
+      expect(saved!.startedDate, DateTime.utc(2026, 6, 1));
       expect(saved.startedDate.hour, 0);
     });
   });
