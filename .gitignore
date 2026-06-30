@@ -27,11 +27,16 @@ migrate_working_dir/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
+*.ipa
 .pub-cache/
 .pub/
 /build/
 /coverage/
+
+ios/Podfile
+macos/Podfile
 
 # Symbolication related
 app.*.symbols
