@@ -85,6 +85,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             'Logged period for ${picked.toLocal().toString().split(' ').first}.'),
         duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
+        persist: false,
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () {
@@ -200,6 +201,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         content: Text('Deleted $dateStr.'),
         duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
+        persist: false,
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () async {

@@ -74,6 +74,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
               'Logged period for ${picked.toLocal().toString().split(' ').first}.'),
           duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
+          persist: false,
           action: SnackBarAction(
             label: 'Undo',
             onPressed: () {
