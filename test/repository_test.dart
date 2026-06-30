@@ -335,4 +335,26 @@ void main() {
       expect(reminder, DateTime(2026, 7, 3, 9));
     });
   });
+
+  group('delete and undo', () {
+    test('undo preserves settings fields', () async {
+      final p = Period(startedDate: DateTime(2026, 6, 1));
+      p.trackingMode = 'manual';
+      p.manualCycleLength = 35;
+      p.reminderDaysBefore = 4;
+      await box.add(p);
+
+      final period = box.values.first;
+      await period.delete();
+      final restored = Period(startedDate: period.startedDate)
+        ..trackingMode = period.trackingMode
+        ..manualCycleLength = period.manualCycleLength
+        ..reminderDaysBefore = period.reminderDaysBefore;
+      await box.add(restored);
+
+      expect(restored.trackingMode, 'manual');
+      expect(restored.manualCycleLength, 35);
+      expect(restored.reminderDaysBefore, 4);
+    });
+  });
 }

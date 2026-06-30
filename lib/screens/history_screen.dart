@@ -206,7 +206,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
           label: 'Undo',
           onPressed: () async {
             final box = Hive.box<Period>(PeriodRepository.boxName);
-            final restored = Period(startedDate: period.startedDate);
+            final restored = Period(startedDate: period.startedDate)
+              ..trackingMode = period.trackingMode
+              ..manualCycleLength = period.manualCycleLength
+              ..reminderDaysBefore = period.reminderDaysBefore;
             await box.add(restored);
 
             final nextReminder = PeriodRepository.nextReminderDate(
@@ -251,7 +254,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 itemCount: _entries.length,
                 itemBuilder: (context, index) {
                   final period = _entries[index];
-                  final isLatest = index == 0;
                   return Dismissible(
                     key: ValueKey(period),
                     direction: DismissDirection.endToStart,
@@ -259,25 +261,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.only(right: 20),
                       color: Colors.red.shade400,
-                      child: Text(
-                        isLatest ? 'Active' : 'Delete',
-                        style: const TextStyle(
+                      child: const Text(
+                        'Delete',
+                        style: TextStyle(
                             color: Colors.white, fontWeight: FontWeight.w500),
                       ),
                     ),
-                    confirmDismiss: isLatest
-                        ? (_) async {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Cannot delete the active period.'),
-                                duration: Duration(seconds: 2),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                            return false;
-                          }
-                        : null,
                     onDismissed: (_) => _onDeletePeriod(period),
                     child: PeriodRow(
                       period: period,

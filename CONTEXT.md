@@ -66,7 +66,7 @@
 
 **Edit a period** — Changing the date of an existing period record. Allowed on any period, including the active one.
 
-**Delete a period** — Removing a period record. The most recent (active) period cannot be deleted.
+**Delete a period** — Removing a period record from history via swipe-to-delete. Any period can be deleted, including the active one. Protected by the Undo snackbar.
 
 **Undo** — Reversing the most recent log, edit, or delete action. Recalculation runs on every change.
 
