@@ -2,24 +2,29 @@
 set -euo pipefail
 
 APP_NAME="Mona"
-CONFIG="debug"
+CONFIG="release"
 NO_CODESIGN="--no-codesign"
 NO_CLEAN=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --release)
-      CONFIG="release"
+    --debug)
+      CONFIG="debug"
       shift
       ;;
     --no-clean)
       NO_CLEAN=true
       shift
       ;;
+    --sign)
+      NO_CODESIGN=""
+      shift
+      ;;
     --help|-h)
       echo "Usage: $0 [options]"
-      echo "  --release      Build in release mode (requires signing)"
+      echo "  --debug        Build debug .ipa (development only, needs flutter run)"
       echo "  --no-clean     Skip 'flutter clean' for faster rebuild"
+      echo "  --sign         Build with signing (for App Store / TestFlight)"
       echo "  --help, -h     Show this help"
       exit 0
       ;;
@@ -54,7 +59,11 @@ if [[ -z "$VERSION" ]]; then
   VERSION="unknown"
 fi
 
-echo "==> $APP_NAME v$VERSION ($CONFIG, no-codesign)"
+CODESIGN_STATUS="no-codesign"
+if [[ -z "$NO_CODESIGN" ]]; then
+  CODESIGN_STATUS="signed"
+fi
+echo "==> $APP_NAME v$VERSION ($CONFIG, $CODESIGN_STATUS)"
 echo ""
 
 if [[ "$NO_CLEAN" == false ]]; then

@@ -53,7 +53,7 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - Install the hook: `Copy-Item scripts/pre-commit .git/hooks/pre-commit -Force` (Windows) or `cp scripts/pre-commit .git/hooks/pre-commit` (macOS/Linux)
 
 ## Build Scripts
-- `scripts/build_ios.sh` — builds a debug `.ipa` for SideStore deployment (run on macOS)
+- `scripts/build_ios.sh` — builds a release `.ipa` for SideStore sideloading (run on macOS; use `--debug` for debug builds)
 
 ## Relevant Files
 - `lib/widgets/period_list_picker.dart`
