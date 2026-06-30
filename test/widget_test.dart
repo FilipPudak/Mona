@@ -261,7 +261,7 @@ void main() {
     expect(find.byType(PeriodRow), findsOneWidget);
   });
 
-  testWidgets('History rows support swipe-to-delete',
+  testWidgets('Swipe-to-delete removes row and shows empty state',
       (WidgetTester tester) async {
     await tester.runAsync(() async {
       final box = Hive.box<Period>('periods');
@@ -274,8 +274,17 @@ void main() {
     await tester.tap(find.text('History'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Dismissible), findsOneWidget);
-    expect(find.text('No periods logged yet.'), findsNothing);
+    expect(find.byType(PeriodRow), findsOneWidget);
+
+    // Wrap the swipe in runAsync so fire-and-forget Hive I/O completes
+    // before teardown, preventing box.close() from hanging.
+    await tester.runAsync(() async {
+      await tester.drag(find.byType(Dismissible), const Offset(-500, 0));
+      await tester.pumpAndSettle();
+    });
+
+    expect(find.byType(PeriodRow), findsNothing);
+    expect(find.text('No periods logged yet.'), findsOneWidget);
   });
 
   testWidgets('Log period: Start button opens picker',
