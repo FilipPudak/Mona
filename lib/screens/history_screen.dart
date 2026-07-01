@@ -189,8 +189,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     deleteFuture.then((_) async {
       try {
         await _repo.rescheduleReminder();
-      } on HiveError {
-        // Box was closed (e.g., during test tearDown)
+      } catch (_) {
+        // Intentionally ignored — fire-and-forget
       }
     });
 

@@ -7,27 +7,7 @@ import 'package:hive/hive.dart';
 import 'package:mona/main.dart';
 import 'package:mona/models/period.dart';
 import 'package:mona/models/settings.dart';
-
-/// Pre-populate settings (preventing _migrateSettingsIfNeeded writes during
-/// widget construction) and optionally seed a period.
-Future<void> prepopulate({DateTime? periodDate}) async {
-  final box = Hive.box<Period>('periods');
-  if (periodDate != null) {
-    await box.add(Period(startedDate: periodDate));
-  }
-  final settings = Hive.box<Settings>('settings');
-  if (settings.isEmpty) {
-    await settings.add(Settings());
-  }
-}
-
-/// Pump enough frames for route transitions and dialog animations to settle.
-Future<void> pumpUntilSettled(WidgetTester tester) async {
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 500));
-  await tester.pump(const Duration(milliseconds: 500));
-  await tester.pump(const Duration(milliseconds: 500));
-}
+import 'test_helpers.dart';
 
 void main() {
   setUp(() async {

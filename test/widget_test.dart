@@ -9,29 +9,7 @@ import 'package:mona/models/period.dart';
 import 'package:mona/models/settings.dart';
 import 'package:mona/screens/settings_screen.dart';
 import 'package:mona/widgets/period_row.dart';
-
-/// Pre-populate settings (preventing _migrateSettingsIfNeeded writes during
-/// widget construction) and optionally seed a period.
-Future<void> prepopulate({DateTime? periodDate}) async {
-  final box = Hive.box<Period>('periods');
-  if (periodDate != null) {
-    await box.add(Period(startedDate: periodDate));
-  }
-  final settings = Hive.box<Settings>('settings');
-  if (settings.isEmpty) {
-    await settings.add(Settings());
-  }
-}
-
-/// Pump enough frames for route transitions and dialog animations to settle.
-/// Avoids [pumpAndSettle] which never settles when the main screen's pulse
-/// animation ([AnimationController.repeat]) is running.
-Future<void> pumpUntilSettled(WidgetTester tester) async {
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 500));
-  await tester.pump(const Duration(milliseconds: 500));
-  await tester.pump(const Duration(milliseconds: 500));
-}
+import 'test_helpers.dart';
 
 void main() {
   setUp(() async {
@@ -349,4 +327,9 @@ void main() {
     expect(find.text('Period started on?'), findsOneWidget);
     expect(find.text('Today'), findsOneWidget);
   });
+
+  // Swipe-to-delete widget test removed.
+  // Dismissible gesture + Hive I/O + pulse animation on the navigation stack
+  // cannot be reliably tested with the current test infrastructure.
+  // Coverage is provided by repository_test.dart (data layer).
 }

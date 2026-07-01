@@ -8,9 +8,7 @@ import 'notification_service.dart';
 /// Read/write access to period records and user settings.
 class PeriodRepository {
   PeriodRepository(this._periodBox)
-      : _settingsBox = Hive.box<Settings>('settings') {
-    _migrateSettingsIfNeeded();
-  }
+      : _settingsBox = Hive.box<Settings>('settings');
 
   static const String boxName = 'periods';
 
@@ -93,20 +91,6 @@ class PeriodRepository {
       _settingsBox.values.first.dateFormat = value;
       await _settingsBox.values.first.save();
     }
-  }
-
-  // ── Migration from legacy Period-stored settings ───────────────────
-
-  void _migrateSettingsIfNeeded() {
-    if (_settingsBox.isNotEmpty) return;
-    final period = currentPeriod();
-    if (period == null) return;
-    _settingsBox.add(Settings(
-      trackingMode: period.trackingMode,
-      manualCycleLength: period.manualCycleLength,
-      reminderDaysBefore: period.reminderDaysBefore,
-      dateFormat: period.dateFormat,
-    ));
   }
 
   // ── Period CRUD ────────────────────────────────────────────────────

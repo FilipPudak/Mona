@@ -1,5 +1,3 @@
-// RadioGroup (replacement for RadioListTile.groupValue) requires Flutter ≥3.44
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
@@ -87,17 +85,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           const _SectionHeader(title: 'Tracking mode'),
-          RadioListTile<String>(
-            title: const Text('Automatic (learns from cycles)'),
-            value: 'automatic',
+          RadioGroup<String>(
             groupValue: trackingMode,
-            onChanged: (v) => v != null ? _setTrackingMode(v) : null,
-          ),
-          RadioListTile<String>(
-            title: const Text('Manual (fixed length)'),
-            value: 'manual',
-            groupValue: trackingMode,
-            onChanged: (v) => v != null ? _setTrackingMode(v) : null,
+            onChanged: (v) {
+              if (v != null) _setTrackingMode(v);
+            },
+            child: const Column(
+              children: [
+                RadioListTile<String>(
+                  title: Text('Automatic (learns from cycles)'),
+                  value: 'automatic',
+                ),
+                RadioListTile<String>(
+                  title: Text('Manual (fixed length)'),
+                  value: 'manual',
+                ),
+              ],
+            ),
           ),
           if (trackingMode == 'manual')
             ListTile(

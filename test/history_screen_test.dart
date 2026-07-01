@@ -8,18 +8,7 @@ import 'package:mona/main.dart';
 import 'package:mona/models/period.dart';
 import 'package:mona/models/settings.dart';
 import 'package:mona/widgets/period_row.dart';
-
-/// Helper: pre-populate Hive boxes inside real async so I/O completes.
-Future<void> prepopulate({DateTime? periodDate}) async {
-  final box = Hive.box<Period>('periods');
-  if (periodDate != null) {
-    await box.add(Period(startedDate: periodDate));
-  }
-  final settings = Hive.box<Settings>('settings');
-  if (settings.isEmpty) {
-    await settings.add(Settings());
-  }
-}
+import 'test_helpers.dart';
 
 void main() {
   setUp(() async {

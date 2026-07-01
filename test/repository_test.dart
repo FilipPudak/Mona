@@ -156,21 +156,6 @@ void main() {
       expect(repo.reminderDaysBefore, 2);
     });
 
-    test('migrates from current period when settings box is empty', () async {
-      final p = Period(startedDate: DateTime(2026, 6, 1));
-      p.trackingMode = 'manual';
-      p.manualCycleLength = 35;
-      p.reminderDaysBefore = 3;
-      p.dateFormat = 'US';
-      await box.add(p);
-      // A fresh repo should migrate the period's settings into the settings box
-      final repo2 = PeriodRepository(box);
-      expect(repo2.trackingMode, 'manual');
-      expect(repo2.manualCycleLength, 35);
-      expect(repo2.reminderDaysBefore, 3);
-      expect(repo2.dateFormat, 'US');
-    });
-
     test('setter updates trackingMode on current period', () async {
       await repo.recordPeriodStart(DateTime(2026, 6, 1));
       await repo.setTrackingMode('manual');
