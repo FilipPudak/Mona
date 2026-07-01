@@ -88,5 +88,4 @@ The existing `test/widget_test.dart` tests render `SettingsScreen` directly via 
 
 ## Further Notes
 
-- The existing `// ignore_for_file: deprecated_member_use` at the top of `settings_screen.dart` is a Flutter 3.27.4 compat artifact and can be removed since the app now targets 3.38.10.
-- The CONTEXT.md glossary entries for **Reminder days picker** and **Notifications toggle** should be updated to reflect the merged section structure and rename to "Notification" (singular).
+- The existing `// ignore_for_file: deprecated_member_use` at the top of `settings_screen.dart` was a Flutter 3.27.4 compat artifact and has been removed (app now targets 3.38.10).

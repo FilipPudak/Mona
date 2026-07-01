@@ -1,10 +1,15 @@
 #!/usr/bin/env sh
 
-set -e
+# `set -e` is deliberately omitted so that dart format's exit code
+# does not prevent git add from re-staging formatted files.
 
 echo "=== dart format ==="
-dart format --set-exit-if-changed lib/ test/
+dart format lib/ test/; FORMAT_EXIT=$?
 git add -A
+if [ "$FORMAT_EXIT" -ne 0 ]; then
+  echo "dart format failed with exit code $FORMAT_EXIT"
+  exit "$FORMAT_EXIT"
+fi
 
 echo "=== flutter analyze ==="
 flutter analyze
