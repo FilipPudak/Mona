@@ -6,19 +6,19 @@
 
 **Cycle** — The span from one period start to the next. Variable length; default is 28 days.
 
-**Cycle day** — The current day within the cycle (1-based), computed from the most recent period start. The maximum is the current cycle's length.
+**Cycle day** — The current day since the last period start (1-based). Computed from the most recent period start. Used for phase coloring. Maximum displayed value is 99.
 
 **Current period** — The most recently logged period start. Used to determine the current cycle day and phase.
 
 **History** — The list of past period start dates, ordered newest first.
 
-**First period** — The initial period start logged at first launch. There is no separate welcome screen; the "Start" button serves as the onboarding mechanism.
+**First period** — The initial period start logged at first launch. There is no separate welcome screen; the `+` button centered on the blank screen serves as the onboarding mechanism.
 
 ## Cycle Phases
 
 **Period phase** — Days 1–6 of the cycle. The bleeding phase. Visually marked with rose.
 
-**Fertile phase** — Days 11–17 of the cycle. The ovulation window. Visually marked with green.
+**Fertile phase** — A visual estimate of the fertile window: ovulation day (`cycleLength - 14`) ± 3 days. Shifts with cycle length. Displayed in green. Not a medical guarantee — a visual cue only.
 
 ## Tracking
 
@@ -42,11 +42,9 @@
 
 ## Prediction
 
-**Due date** — The expected start of the next period, calculated as `lastPeriodStart + cycleLength`.
+**Due date** — The expected start of the next period, calculated as `lastPeriodStart + cycleLength`. Displayed as a bare date below the day counter.
 
-**Day counter cap** — The day counter plateaus at the cycle length. It represents cycle-day position, not raw days since last period. When overdue, the counter stays at the cap and the caption communicates the state.
-
-**Overdue** — The period following the due date when no new period has been logged. Day counter is capped at cycle length. Caption shows "Period may start today" for 7 days past due, then switches to "Log your new period."
+**Overdue** — The period following the due date when no new period has been logged. Starting the day after the due date: the expected date goes dim, the day counter text dims (if in default black), and the `+` button begins pulsing. No text prompt.
 
 **Reminder** — A notification sent N days before the due date (default 2) at 09:00.
 
@@ -54,15 +52,15 @@
 
 ## Main Screen
 
-**Day counter** — Large cycle day number (1-based, capped at cycle length). Colored per phase (rose for 1–6, green for 11–17, black otherwise).
+**Day counter** — Large day number (1-based, raw days since last period start). Uncapped up to 99, then shows `99+`. Colored per phase (rose for 1–6, green for 11–17, black otherwise). When overdue, the default black color goes dim; phase colors (rose, green) retain full opacity.
 
-**Expected date** — The due date shown as "Next: June 28." Replaces today's date as the primary caption. When in due/overdue state, caption switches to state message.
+**Expected date** — The due date shown as a bare date below the day counter. Format is `DD/MM` (default EU) or `MM/DD` (US configurable). Goes dim when overdue.
 
-**Start button** — Primary action to log a new period. Serves as implicit onboarding on first launch.
+**Log action** — A rose (`#E68192`) circular button with a white `+` icon. Serves as primary action to log a new period and as implicit onboarding on first launch. Position is centered on first launch (no periods logged) and bottom-anchored after the first period is recorded. Transition between positions is animated. Pulses subtly (scale oscillation) when overdue — starting the day after the due date — as a re-engagement cue.
 
 ## Actions
 
-**Log a period** — Recording a new period start date. Can be done for today (via the main button) or for a past date (via the history screen).
+**Log a period** — Recording a new period start date. Can be done for today (via the `+` button on the main screen) or for a past date (via the history screen).
 
 **Edit a period** — Changing the date of an existing period record. Allowed on any period, including the active one.
 
@@ -75,6 +73,8 @@
 **Trust user input** — All logged dates are accepted as-is. No outlier detection. Users correct mistakes by editing or deleting the entry.
 
 ## Settings
+
+**Date format** — The format for the expected date on the main screen. Default is EU (`DD/MM`). User may switch to US (`MM/DD`) via a toggle in Settings.
 
 **Settings entry** — A gear icon in the app bar. Standard, minimal, universally understood.
 
