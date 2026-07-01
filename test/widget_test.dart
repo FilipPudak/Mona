@@ -47,7 +47,6 @@ void main() {
     await tester.pump();
 
     expect(find.text('Tracking mode'), findsOneWidget);
-    expect(find.text('Cycle length'), findsAtLeastNWidgets(1));
     expect(find.text('Reminder'), findsAtLeastNWidgets(1));
     expect(find.text('Notification'), findsAtLeastNWidgets(1));
     expect(find.text('Your data stays on this device.'), findsOneWidget);

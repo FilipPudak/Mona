@@ -253,7 +253,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('History'),
+        title:
+            const Text('History', style: TextStyle(color: Color(0xFFE68192))),
         actions: [
           TextButton(
             onPressed: _onAddPastPeriod,

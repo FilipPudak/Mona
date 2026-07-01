@@ -64,27 +64,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _onInfoTap() {
-    final count = _repo.periodCount;
-    final eligible = _repo.eligibleForAuto();
-    final avg = _repo.averageCycleLength();
-    final message = eligible
-        ? 'Based on your $count recorded cycle${count == 1 ? '' : 's'}. Average: $avg days.'
-        : 'Not enough cycles yet (need at least 4 logged periods).';
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _toggleNotifications(bool on) {
     setState(() => _notificationsOn = on);
     if (on) {
@@ -110,13 +89,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final trackingMode = _repo.trackingMode;
-    final isAuto = trackingMode == 'automatic';
-    final cycleLength = _repo.currentCycleLength();
     final manualLength = _repo.manualCycleLength;
     final reminderDays = _repo.reminderDaysBefore;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(
+        title:
+            const Text('Settings', style: TextStyle(color: Color(0xFFE68192))),
+      ),
       body: ListView(
         children: [
           const _SectionHeader(title: 'Tracking mode'),
@@ -132,40 +112,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
             groupValue: trackingMode,
             onChanged: (v) => v != null ? _setTrackingMode(v) : null,
           ),
-          const Divider(height: 1),
-          const _SectionHeader(title: 'Cycle length'),
-          ListTile(
-            title: const Text('Cycle length'),
-            trailing: isAuto
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('$cycleLength days',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(fontWeight: FontWeight.w600)),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: _onInfoTap,
-                        child: Icon(Icons.info_outline,
-                            size: 18, color: Colors.grey.shade600),
-                      ),
-                    ],
-                  )
-                : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('$manualLength days',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(fontWeight: FontWeight.w600)),
-                      const Icon(Icons.chevron_right),
-                    ],
-                  ),
-            onTap: isAuto ? null : _showCycleLengthPicker,
-          ),
+          if (trackingMode == 'manual')
+            ListTile(
+              contentPadding:
+                  const EdgeInsetsDirectional.only(start: 72, end: 16),
+              title: const Text('Cycle length'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('$manualLength days',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.w600)),
+                  const Icon(Icons.chevron_right),
+                ],
+              ),
+              onTap: _showCycleLengthPicker,
+            ),
           const Divider(height: 1),
           const _SectionHeader(title: 'Reminder'),
           ListTile(
@@ -186,7 +150,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             onTap: _notificationsOn ? _showReminderPicker : null,
           ),
-          const Divider(height: 1),
           SwitchListTile(
             title: const Text('Notification'),
             value: _notificationsOn,
@@ -194,24 +157,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(height: 1),
           const _SectionHeader(title: 'Date format'),
-          ListTile(
-            title: const Text('Date format'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(_repo.dateFormat == 'EU' ? 'DD/MM' : 'MM/DD',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w600)),
-                const Icon(Icons.chevron_right),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'EU', label: Text('DD/MM')),
+                ButtonSegment(value: 'US', label: Text('MM/DD')),
               ],
+              selected: {_repo.dateFormat},
+              onSelectionChanged: (Set<String> selection) {
+                _repo.setDateFormat(selection.first);
+                setState(() {});
+              },
             ),
-            onTap: () {
-              final newFormat = _repo.dateFormat == 'EU' ? 'US' : 'EU';
-              _repo.setDateFormat(newFormat);
-              setState(() {});
-            },
           ),
           const Divider(height: 1),
           const _SectionHeader(title: 'Privacy'),
