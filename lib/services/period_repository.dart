@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../models/period.dart';
@@ -41,6 +42,7 @@ class PeriodRepository {
   String get trackingMode => currentPeriod()?.trackingMode ?? 'automatic';
   int get manualCycleLength => currentPeriod()?.manualCycleLength ?? 28;
   int get reminderDaysBefore => currentPeriod()?.reminderDaysBefore ?? 2;
+  String get dateFormat => currentPeriod()?.dateFormat ?? 'EU';
 
   Future<void> setTrackingMode(String value) async {
     final period = currentPeriod();
@@ -60,6 +62,13 @@ class PeriodRepository {
     final period = currentPeriod();
     if (period == null) return;
     period.reminderDaysBefore = value;
+    await period.save();
+  }
+
+  Future<void> setDateFormat(String value) async {
+    final period = currentPeriod();
+    if (period == null) return;
+    period.dateFormat = value;
     await period.save();
   }
 
@@ -107,16 +116,39 @@ class PeriodRepository {
     return period;
   }
 
-  /// Cycle day (1-based) for [today] given a period starting on [start].
-  /// Clamped to 1..[cycleLength]. Default cap is 28 when not specified.
-  static int dayOfCycle(DateTime start, DateTime today,
-      {int cycleLength = 28}) {
+  /// Raw day (1-based) since [start]. Lower bound 1, upper bound 99.
+  static int dayOfCycle(DateTime start, DateTime today) {
     final startDay = DateTime(start.year, start.month, start.day);
     final todayDay = DateTime(today.year, today.month, today.day);
     final diff = todayDay.difference(startDay).inDays + 1;
     if (diff < 1) return 1;
-    if (diff > cycleLength) return cycleLength;
+    if (diff > 99) return 99;
     return diff;
+  }
+
+  /// Returns `true` when [today] is after the due date for [start] and
+  /// [cycleLength].
+  static bool isOverdue(DateTime start, DateTime today, int cycleLength) {
+    final due = DateTime(start.year, start.month, start.day)
+        .add(Duration(days: cycleLength));
+    return today.isAfter(due);
+  }
+
+  /// Returns the inclusive fertile window as `(start, end)` for a given
+  /// [cycleLength]. The fertile window is `ovulationDay ± 3` where
+  /// `ovulationDay = cycleLength - 14`.
+  static (int, int) fertileWindow(int cycleLength) {
+    final ovulationDay = cycleLength - 14;
+    return (ovulationDay - 3, ovulationDay + 3);
+  }
+
+  /// Returns the phase color for a given [day] and [cycleLength].
+  /// Period phase (rose, days 1–6) wins over fertile window overlap.
+  static Color phaseColor(int day, int cycleLength) {
+    if (day >= 1 && day <= 6) return const Color(0xFFE68192);
+    final (start, end) = fertileWindow(cycleLength);
+    if (day >= start && day <= end) return Colors.green;
+    return Colors.black87;
   }
 
   /// Date/time at which the next reminder should fire: 09:00 local on

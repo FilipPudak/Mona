@@ -193,6 +193,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: _toggleNotifications,
           ),
           const Divider(height: 1),
+          const _SectionHeader(title: 'Date format'),
+          ListTile(
+            title: const Text('Date format'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_repo.dateFormat == 'EU' ? 'DD/MM' : 'MM/DD',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+            onTap: () {
+              final newFormat = _repo.dateFormat == 'EU' ? 'US' : 'EU';
+              _repo.setDateFormat(newFormat);
+              setState(() {});
+            },
+          ),
+          const Divider(height: 1),
           const _SectionHeader(title: 'Privacy'),
           const ListTile(
             title: Text('Your data stays on this device.'),

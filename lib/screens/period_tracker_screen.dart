@@ -16,13 +16,38 @@ class PeriodTrackerScreen extends StatefulWidget {
   State<PeriodTrackerScreen> createState() => _PeriodTrackerScreenState();
 }
 
-class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
+class _PeriodTrackerScreenState extends State<PeriodTrackerScreen>
+    with SingleTickerProviderStateMixin {
   late final PeriodRepository _repo;
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseAnimation;
 
   @override
   void initState() {
     super.initState();
     _repo = PeriodRepository(Hive.box<Period>(PeriodRepository.boxName));
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 750),
+    );
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  void _updatePulse(bool overdue) {
+    if (overdue && !_pulseController.isAnimating) {
+      _pulseController.repeat(reverse: true);
+    } else if (!overdue && _pulseController.isAnimating) {
+      _pulseController.stop();
+      _pulseController.reset();
+    }
   }
 
   Future<void> _onLogPeriod() async {
@@ -104,50 +129,30 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     final cycleLength = _repo.currentCycleLength();
     final day = period == null
         ? 0
-        : PeriodRepository.dayOfCycle(
-            period.startedDate,
-            today,
-            cycleLength: cycleLength,
-          );
+        : PeriodRepository.dayOfCycle(period.startedDate, today);
+    final dayLabel = period == null ? null : (day >= 99 ? '99+' : '$day');
 
-    Color dayColor = Colors.black87;
-    if (day >= 1 && day <= 6) {
-      dayColor = const Color(0xFFE68192);
-    } else if (day >= 11 && day <= 17) {
-      dayColor = Colors.green;
-    }
+    final dayColor = period == null
+        ? Colors.black87
+        : PeriodRepository.phaseColor(day, cycleLength);
 
-    String caption;
-    if (period == null) {
-      caption = 'Tap below when your period starts.';
-    } else {
+    final bool overdue = period != null &&
+        PeriodRepository.isOverdue(period.startedDate, today, cycleLength);
+    _updatePulse(overdue);
+    final Color effectiveDayColor = overdue && dayColor == Colors.black87
+        ? dayColor.withValues(alpha: 0.38)
+        : dayColor;
+
+    String? expectedDate;
+    if (period != null) {
       final dueDate = DateTime(
         period.startedDate.year,
         period.startedDate.month,
         period.startedDate.day,
       ).add(Duration(days: cycleLength));
-      final diff = today.difference(dueDate).inDays;
-      if (diff < 0) {
-        const months = [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December',
-        ];
-        caption = 'Next: ${months[dueDate.month - 1]} ${dueDate.day}';
-      } else if (diff <= 7) {
-        caption = 'Period may start today.';
-      } else {
-        caption = 'Log your new period.';
-      }
+      final dd = dueDate.day.toString().padLeft(2, '0');
+      final mm = dueDate.month.toString().padLeft(2, '0');
+      expectedDate = _repo.dateFormat == 'EU' ? '$dd/$mm' : '$mm/$dd';
     }
 
     return Scaffold(
@@ -182,44 +187,69 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const Spacer(),
-              if (period != null) ...[
-                DayCounter(day: day, color: dayColor),
-                const SizedBox(height: 16),
-              ],
-              Text(
-                caption,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.black54,
-                    ),
-              ),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: FilledButton(
-                  onPressed: _onLogPeriod,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black87,
-                    side: const BorderSide(color: Colors.black12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Segoe UI',
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              const double buttonSize = 56;
+              const double bottomPadding = 32;
+              final buttonTopCentered =
+                  (constraints.maxHeight - buttonSize) / 2;
+              final buttonTopBottom =
+                  constraints.maxHeight - buttonSize - bottomPadding;
+
+              return Stack(
+                children: [
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (period != null) ...[
+                          DayCounter(
+                              label: dayLabel!, color: effectiveDayColor),
+                          const SizedBox(height: 8),
+                          Opacity(
+                            key: const Key('expected_date_opacity'),
+                            opacity: overdue ? 0.38 : 1.0,
+                            child: Text(
+                              expectedDate!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(color: Colors.black54),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                  child: const Text('Start'),
-                ),
-              ),
-              const SizedBox(height: 32),
-            ],
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    left: (constraints.maxWidth - buttonSize) / 2,
+                    width: buttonSize,
+                    height: buttonSize,
+                    top: period != null ? buttonTopBottom : buttonTopCentered,
+                    child: AnimatedBuilder(
+                      animation: _pulseAnimation,
+                      builder: (context, child) => Transform.scale(
+                        scale: _pulseAnimation.value,
+                        child: child,
+                      ),
+                      child: SizedBox(
+                        width: buttonSize,
+                        height: buttonSize,
+                        child: FloatingActionButton(
+                          onPressed: _onLogPeriod,
+                          backgroundColor: const Color(0xFFE68192),
+                          foregroundColor: Colors.white,
+                          shape: const CircleBorder(),
+                          child: const Icon(Icons.add),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

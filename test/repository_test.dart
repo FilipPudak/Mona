@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
@@ -120,22 +121,17 @@ void main() {
       expect(PeriodRepository.dayOfCycle(start, today), 15);
     });
 
-    test('defaults to 28-day cap when no cycleLength given', () {
-      final start = DateTime(2026, 5, 1);
-      final today = DateTime(2026, 6, 26);
-      expect(PeriodRepository.dayOfCycle(start, today), 28);
-    });
-
-    test('uses provided cycleLength as cap', () {
-      final start = DateTime(2026, 6, 1);
-      final today = DateTime(2026, 7, 1);
-      expect(PeriodRepository.dayOfCycle(start, today, cycleLength: 35), 31);
-    });
-
-    test('caps at provided cycleLength when overdue', () {
+    test('returns uncapped day past cycle length', () {
       final start = DateTime(2026, 6, 1);
       final today = DateTime(2026, 7, 20);
-      expect(PeriodRepository.dayOfCycle(start, today, cycleLength: 35), 35);
+      expect(PeriodRepository.dayOfCycle(start, today), 50);
+    });
+
+    test('caps at 99 when day exceeds 99', () {
+      final start = DateTime(2026, 1, 1);
+      final today = DateTime(2026, 5, 1);
+      // 120 days between, day = 121 → cap at 99
+      expect(PeriodRepository.dayOfCycle(start, today), 99);
     });
 
     test('clamps to minimum of 1', () {
@@ -313,6 +309,90 @@ void main() {
         await repo.recordPeriodStart(DateTime(2027, 1, 1));
         expect(repo.eligibleForAuto(), isFalse);
       });
+    });
+  });
+
+  group('phaseColor', () {
+    test('returns rose for day 5 (period phase)', () {
+      expect(PeriodRepository.phaseColor(5, 28), const Color(0xFFE68192));
+    });
+
+    test('returns green for day 15 with 28-day cycle (fertile window)', () {
+      expect(PeriodRepository.phaseColor(15, 28), Colors.green);
+    });
+
+    test('returns black for day 15 with 35-day cycle (outside fertile window)',
+        () {
+      expect(PeriodRepository.phaseColor(15, 35), Colors.black87);
+    });
+
+    test('returns green for day 20 with 35-day cycle (fertile window)', () {
+      expect(PeriodRepository.phaseColor(20, 35), Colors.green);
+    });
+
+    test('returns rose for day 4 with 21-day cycle (period phase wins overlap)',
+        () {
+      expect(PeriodRepository.phaseColor(4, 21), const Color(0xFFE68192));
+    });
+  });
+
+  group('isOverdue', () {
+    test('returns false when today equals due date', () {
+      final start = DateTime(2026, 6, 1);
+      final due = start.add(const Duration(days: 28));
+      expect(PeriodRepository.isOverdue(start, due, 28), isFalse);
+    });
+
+    test('returns true when today is past due date', () {
+      final start = DateTime(2026, 6, 1);
+      final today = start.add(const Duration(days: 29));
+      expect(PeriodRepository.isOverdue(start, today, 28), isTrue);
+    });
+
+    test('returns false when today is before due date', () {
+      final start = DateTime(2026, 6, 1);
+      final today = start.add(const Duration(days: 20));
+      expect(PeriodRepository.isOverdue(start, today, 28), isFalse);
+    });
+  });
+
+  group('dateFormat', () {
+    test('defaults to EU when no periods exist', () {
+      expect(repo.dateFormat, 'EU');
+    });
+
+    test('reads from current period when one exists', () async {
+      await repo.recordPeriodStart(DateTime(2026, 6, 1));
+      await repo.setDateFormat('US');
+      expect(repo.dateFormat, 'US');
+    });
+
+    test('setter updates dateFormat on current period', () async {
+      await repo.recordPeriodStart(DateTime(2026, 6, 1));
+      await repo.setDateFormat('US');
+      expect(repo.dateFormat, 'US');
+      await repo.setDateFormat('EU');
+      expect(repo.dateFormat, 'EU');
+    });
+  });
+
+  group('fertileWindow', () {
+    test('returns (11, 17) for 28-day cycle', () {
+      final (start, end) = PeriodRepository.fertileWindow(28);
+      expect(start, 11);
+      expect(end, 17);
+    });
+
+    test('returns (18, 24) for 35-day cycle', () {
+      final (start, end) = PeriodRepository.fertileWindow(35);
+      expect(start, 18);
+      expect(end, 24);
+    });
+
+    test('returns (4, 10) for 21-day cycle', () {
+      final (start, end) = PeriodRepository.fertileWindow(21);
+      expect(start, 4);
+      expect(end, 10);
     });
   });
 

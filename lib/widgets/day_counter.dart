@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class DayCounter extends StatelessWidget {
-  const DayCounter({super.key, required this.day, required this.color});
+  const DayCounter({super.key, required this.label, required this.color});
 
-  final int day;
+  final String label;
   final Color color;
 
   @override
@@ -14,7 +14,7 @@ class DayCounter extends StatelessWidget {
         textScaler: const TextScaler.linear(1.75),
       ),
       child: Text(
-        '$day',
+        label,
         style: theme.textTheme.displayLarge?.copyWith(
           color: color,
           fontWeight: FontWeight.w300,

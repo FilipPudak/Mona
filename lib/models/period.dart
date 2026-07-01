@@ -20,6 +20,9 @@ class Period extends HiveObject {
   @HiveField(4, defaultValue: 2)
   int reminderDaysBefore = 2;
 
+  @HiveField(5, defaultValue: 'EU')
+  String dateFormat = 'EU';
+
   Period({required DateTime startedDate})
       : startedDate = startedDate.hour == 0 && startedDate.minute == 0
             ? DateTime.utc(startedDate.year, startedDate.month, startedDate.day)
