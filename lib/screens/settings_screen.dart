@@ -24,8 +24,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _repo = PeriodRepository(Hive.box<Period>(PeriodRepository.boxName));
   }
 
-  Future<void> _setTrackingMode(String mode) async {
-    await _repo.setTrackingMode(mode);
+  void _setTrackingMode(String mode) {
+    _repo.setTrackingMode(mode);
     setState(() {});
   }
 
@@ -38,8 +38,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         currentValue: current,
         min: 21,
         max: 45,
-        onSelected: (v) async {
-          await _repo.setManualCycleLength(v);
+        onSelected: (v) {
+          _repo.setManualCycleLength(v);
           if (mounted) setState(() {});
         },
       ),
@@ -56,8 +56,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         min: 1,
         max: 5,
         suffix: (v) => ' day${v == 1 ? '' : 's'} before',
-        onSelected: (v) async {
-          await _repo.setReminderDaysBefore(v);
+        onSelected: (v) {
+          _repo.setReminderDaysBefore(v);
           if (mounted) setState(() {});
         },
       ),
@@ -67,20 +67,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _toggleNotifications(bool on) {
     setState(() => _notificationsOn = on);
     if (on) {
-      final period = _repo.currentPeriod();
-      if (period != null) {
-        final nextReminder = PeriodRepository.nextReminderDate(
-          period.startedDate,
-          cycleLength: _repo.currentCycleLength(),
-          reminderDaysBefore: _repo.reminderDaysBefore,
-        );
-        if (!nextReminder.isBefore(DateTime.now())) {
-          NotificationService.instance.scheduleReminder(
-            nextReminder,
-            reminderDaysBefore: _repo.reminderDaysBefore,
-          );
-        }
-      }
+      _repo.rescheduleReminder();
     } else {
       NotificationService.instance.cancelReminder();
     }

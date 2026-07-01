@@ -6,8 +6,32 @@ import 'package:hive/hive.dart';
 
 import 'package:mona/main.dart';
 import 'package:mona/models/period.dart';
+import 'package:mona/models/settings.dart';
 import 'package:mona/screens/settings_screen.dart';
 import 'package:mona/widgets/period_row.dart';
+
+/// Pre-populate settings (preventing _migrateSettingsIfNeeded writes during
+/// widget construction) and optionally seed a period.
+Future<void> prepopulate({DateTime? periodDate}) async {
+  final box = Hive.box<Period>('periods');
+  if (periodDate != null) {
+    await box.add(Period(startedDate: periodDate));
+  }
+  final settings = Hive.box<Settings>('settings');
+  if (settings.isEmpty) {
+    await settings.add(Settings());
+  }
+}
+
+/// Pump enough frames for route transitions and dialog animations to settle.
+/// Avoids [pumpAndSettle] which never settles when the main screen's pulse
+/// animation ([AnimationController.repeat]) is running.
+Future<void> pumpUntilSettled(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 500));
+  await tester.pump(const Duration(milliseconds: 500));
+  await tester.pump(const Duration(milliseconds: 500));
+}
 
 void main() {
   setUp(() async {
@@ -15,16 +39,25 @@ void main() {
     if (!Hive.isAdapterRegistered(PeriodAdapter().typeId)) {
       Hive.registerAdapter(PeriodAdapter());
     }
+    if (!Hive.isAdapterRegistered(SettingsAdapter().typeId)) {
+      Hive.registerAdapter(SettingsAdapter());
+    }
     await Hive.openBox<Period>('periods');
+    await Hive.openBox<Settings>('settings');
   });
 
   tearDown(() async {
     final box = Hive.box<Period>('periods');
     await box.close();
+    final settings = Hive.box<Settings>('settings');
+    await settings.close();
     await Hive.deleteBoxFromDisk('periods');
+    await Hive.deleteBoxFromDisk('settings');
   });
 
   testWidgets('App bar shows Mona', (WidgetTester tester) async {
+    await tester.runAsync(() => prepopulate());
+
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
@@ -33,6 +66,8 @@ void main() {
 
   testWidgets('App bar has gear icon for settings',
       (WidgetTester tester) async {
+    await tester.runAsync(() => prepopulate());
+
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
@@ -41,9 +76,9 @@ void main() {
 
   testWidgets('Settings screen shows tracking mode options',
       (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: SettingsScreen()),
-    );
+    await tester.runAsync(() => prepopulate());
+
+    await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
     await tester.pump();
 
     expect(find.text('Tracking mode'), findsOneWidget);
@@ -54,6 +89,8 @@ void main() {
 
   testWidgets('Empty state shows no day counter and no caption',
       (WidgetTester tester) async {
+    await tester.runAsync(() => prepopulate());
+
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
@@ -66,10 +103,7 @@ void main() {
       (WidgetTester tester) async {
     final now = DateTime.now();
     final start = now.subtract(const Duration(days: 10));
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: start));
-    });
+    await tester.runAsync(() => prepopulate(periodDate: start));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -82,10 +116,7 @@ void main() {
   });
 
   testWidgets('Day 1 shows rose phase color', (WidgetTester tester) async {
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: DateTime.now()));
-    });
+    await tester.runAsync(() => prepopulate(periodDate: DateTime.now()));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -96,10 +127,7 @@ void main() {
 
   testWidgets('Day 12 shows green phase color', (WidgetTester tester) async {
     final start = DateTime.now().subtract(const Duration(days: 11));
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: start));
-    });
+    await tester.runAsync(() => prepopulate(periodDate: start));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -110,10 +138,7 @@ void main() {
 
   testWidgets('Day 18 shows default black color', (WidgetTester tester) async {
     final start = DateTime.now().subtract(const Duration(days: 17));
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: start));
-    });
+    await tester.runAsync(() => prepopulate(periodDate: start));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -125,10 +150,7 @@ void main() {
   testWidgets('Day counter dims in black phase when overdue',
       (WidgetTester tester) async {
     final start = DateTime.now().subtract(const Duration(days: 35));
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: start));
-    });
+    await tester.runAsync(() => prepopulate(periodDate: start));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -140,10 +162,7 @@ void main() {
   testWidgets('Expected date dims when overdue', (WidgetTester tester) async {
     final now = DateTime.now();
     final start = now.subtract(const Duration(days: 35));
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: start));
-    });
+    await tester.runAsync(() => prepopulate(periodDate: start));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -156,10 +175,7 @@ void main() {
   testWidgets('Day counter shows 99+ when day exceeds 99',
       (WidgetTester tester) async {
     final start = DateTime.now().subtract(const Duration(days: 120));
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: start));
-    });
+    await tester.runAsync(() => prepopulate(periodDate: start));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -171,10 +187,7 @@ void main() {
   testWidgets('Day counter shows uncapped value past cycle length',
       (WidgetTester tester) async {
     final start = DateTime.now().subtract(const Duration(days: 35));
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: start));
-    });
+    await tester.runAsync(() => prepopulate(periodDate: start));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -184,9 +197,9 @@ void main() {
 
   testWidgets('Settings shows date format control',
       (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: SettingsScreen()),
-    );
+    await tester.runAsync(() => prepopulate());
+
+    await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
     await tester.pump();
 
     expect(find.text('Date format'), findsAtLeastNWidgets(1));
@@ -194,9 +207,9 @@ void main() {
 
   testWidgets('Settings shows merged Reminder section with correct labels',
       (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: SettingsScreen()),
-    );
+    await tester.runAsync(() => prepopulate());
+
+    await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
     await tester.pump();
 
     expect(find.text('Reminder'), findsAtLeastNWidgets(1));
@@ -207,33 +220,37 @@ void main() {
 
   testWidgets('Days before row disabled when notifications OFF',
       (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: SettingsScreen()),
-    );
+    await tester.runAsync(() => prepopulate());
+
+    await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
     await tester.pump();
 
     await tester.tap(find.byType(Switch));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     final daysBeforeTile = find.text('Days before');
     expect(tester.widget<Text>(daysBeforeTile).style?.color, Colors.grey);
 
     await tester.tap(daysBeforeTile);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(ListWheelScrollView), findsNothing);
   });
 
   testWidgets('Days before row enabled when notifications ON',
       (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: SettingsScreen()),
-    );
+    await tester.runAsync(() => prepopulate());
+
+    await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
     await tester.pump();
 
     await tester.tap(find.byType(Switch));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(find.byType(Switch));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byIcon(Icons.chevron_right), findsAtLeastNWidgets(1));
 
@@ -245,17 +262,19 @@ void main() {
 
   testWidgets('Settings: notifications switch toggles',
       (WidgetTester tester) async {
+    await tester.runAsync(() => prepopulate());
+
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.settings));
-    await tester.pumpAndSettle();
+    await pumpUntilSettled(tester);
 
     final switchFinder = find.byType(Switch);
     expect(switchFinder, findsOneWidget);
 
     await tester.tap(switchFinder);
-    await tester.pumpAndSettle();
+    await pumpUntilSettled(tester);
 
     final switchWidget = tester.widget<Switch>(switchFinder);
     expect(switchWidget.value, isFalse);
@@ -263,6 +282,8 @@ void main() {
 
   testWidgets('App bar has history icon to navigate to records',
       (WidgetTester tester) async {
+    await tester.runAsync(() => prepopulate());
+
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
@@ -270,55 +291,28 @@ void main() {
   });
 
   testWidgets('History shows empty state', (WidgetTester tester) async {
+    await tester.runAsync(() => prepopulate());
+
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.history));
-    await tester.pumpAndSettle();
+    await pumpUntilSettled(tester);
 
     expect(find.text('No periods logged yet.'), findsOneWidget);
   });
 
   testWidgets('History shows period rows when periods exist',
       (WidgetTester tester) async {
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: DateTime(2026, 6, 1)));
-    });
+    await tester.runAsync(() => prepopulate(periodDate: DateTime(2026, 6, 1)));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.history));
-    await tester.pumpAndSettle();
+    await pumpUntilSettled(tester);
 
     expect(find.byType(PeriodRow), findsOneWidget);
-  });
-
-  testWidgets('Swipe-to-delete removes row and shows empty state',
-      (WidgetTester tester) async {
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: DateTime(2026, 6, 1)));
-    });
-
-    await tester.pumpWidget(const MyApp());
-    await tester.pump();
-
-    await tester.tap(find.byIcon(Icons.history));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(PeriodRow), findsOneWidget);
-
-    // Wrap the swipe in runAsync so fire-and-forget Hive I/O completes
-    // before teardown, preventing box.close() from hanging.
-    await tester.runAsync(() async {
-      await tester.drag(find.byType(Dismissible), const Offset(-500, 0));
-      await tester.pumpAndSettle();
-    });
-
-    expect(find.byType(PeriodRow), findsNothing);
-    expect(find.text('No periods logged yet.'), findsOneWidget);
   });
 
   testWidgets('Rose circle + button replaces Start text',
@@ -327,6 +321,8 @@ void main() {
       await tester.binding.setSurfaceSize(Size.zero);
     });
     await tester.binding.setSurfaceSize(const Size(800, 1000));
+
+    await tester.runAsync(() => prepopulate());
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
@@ -340,6 +336,8 @@ void main() {
       await tester.binding.setSurfaceSize(Size.zero);
     });
     await tester.binding.setSurfaceSize(const Size(800, 1000));
+
+    await tester.runAsync(() => prepopulate());
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();

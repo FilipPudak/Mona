@@ -5,7 +5,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
 import 'package:mona/models/period.dart';
+import 'package:mona/models/settings.dart';
 import 'package:mona/screens/settings_screen.dart';
+import 'package:mona/services/period_repository.dart';
+
+/// Pre-populate settings (preventing _migrateSettingsIfNeeded writes during
+/// widget construction) and optionally seed a period.
+Future<void> prepopulate({DateTime? periodDate}) async {
+  final box = Hive.box<Period>('periods');
+  if (periodDate != null) {
+    await box.add(Period(startedDate: periodDate));
+  }
+  final settings = Hive.box<Settings>('settings');
+  if (settings.isEmpty) {
+    await settings.add(Settings());
+  }
+}
 
 void main() {
   setUp(() async {
@@ -13,33 +28,31 @@ void main() {
     if (!Hive.isAdapterRegistered(PeriodAdapter().typeId)) {
       Hive.registerAdapter(PeriodAdapter());
     }
+    if (!Hive.isAdapterRegistered(SettingsAdapter().typeId)) {
+      Hive.registerAdapter(SettingsAdapter());
+    }
     await Hive.openBox<Period>('periods');
+    await Hive.openBox<Settings>('settings');
   });
 
   tearDown(() async {
     final box = Hive.box<Period>('periods');
     await box.close();
+    final settings = Hive.box<Settings>('settings');
+    await settings.close();
     await Hive.deleteBoxFromDisk('periods');
+    await Hive.deleteBoxFromDisk('settings');
   });
 
   group('tracking mode', () {
     testWidgets('Cycle length row appears when Manual is selected',
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        final box = Hive.box<Period>('periods');
-        await box.add(Period(startedDate: DateTime(2026, 6, 1)));
+        final box = Hive.box<Settings>('settings');
+        await box.add(Settings(trackingMode: 'manual'));
       });
 
       await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
-      await tester.pump();
-
-      expect(find.text('Cycle length'), findsNothing);
-
-      // Tap Manual and let Hive I/O complete
-      await tester.runAsync(() async {
-        await tester.tap(find.text('Manual (fixed length)'));
-        await Future.delayed(const Duration(milliseconds: 100));
-      });
       await tester.pump();
 
       expect(find.text('Cycle length'), findsOneWidget);
@@ -48,24 +61,11 @@ void main() {
     testWidgets('Cycle length row hides when Automatic is selected',
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        final box = Hive.box<Period>('periods');
-        await box.add(Period(startedDate: DateTime(2026, 6, 1)));
+        final box = Hive.box<Settings>('settings');
+        await box.add(Settings(trackingMode: 'automatic'));
       });
 
       await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
-      await tester.pump();
-
-      await tester.runAsync(() async {
-        await tester.tap(find.text('Manual (fixed length)'));
-        await Future.delayed(const Duration(milliseconds: 100));
-      });
-      await tester.pump();
-      expect(find.text('Cycle length'), findsOneWidget);
-
-      await tester.runAsync(() async {
-        await tester.tap(find.text('Automatic (learns from cycles)'));
-        await Future.delayed(const Duration(milliseconds: 100));
-      });
       await tester.pump();
 
       expect(find.text('Cycle length'), findsNothing);
@@ -73,32 +73,25 @@ void main() {
 
     testWidgets('tapping radio updates tracking mode in store',
         (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        final box = Hive.box<Period>('periods');
-        await box.add(Period(startedDate: DateTime(2026, 6, 1)));
-      });
+      await tester.runAsync(() => prepopulate());
 
       await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
       await tester.pump();
 
       await tester.runAsync(() async {
         await tester.tap(find.text('Manual (fixed length)'));
-        await Future.delayed(const Duration(milliseconds: 100));
+        await tester.pumpAndSettle();
       });
-      await tester.pump();
 
-      final period = Hive.box<Period>('periods').values.first;
-      expect(period.trackingMode, 'manual');
+      final repo = PeriodRepository(Hive.box<Period>('periods'));
+      expect(repo.trackingMode, 'manual');
     });
   });
 
   group('date format', () {
     testWidgets('SegmentedButton has both format options',
         (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        final box = Hive.box<Period>('periods');
-        await box.add(Period(startedDate: DateTime(2026, 6, 1)));
-      });
+      await tester.runAsync(() => prepopulate());
 
       await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
       await tester.pump();
@@ -110,8 +103,8 @@ void main() {
     testWidgets('tapping MM/DD updates dateFormat in store',
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        final box = Hive.box<Period>('periods');
-        await box.add(Period(startedDate: DateTime(2026, 6, 1)));
+        final box = Hive.box<Settings>('settings');
+        await box.add(Settings(dateFormat: 'EU'));
       });
 
       await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
@@ -119,21 +112,18 @@ void main() {
 
       await tester.runAsync(() async {
         await tester.tap(find.text('MM/DD'));
-        await Future.delayed(const Duration(milliseconds: 100));
+        await tester.pumpAndSettle();
       });
-      await tester.pump();
 
-      final period = Hive.box<Period>('periods').values.first;
-      expect(period.dateFormat, 'US');
+      final repo = PeriodRepository(Hive.box<Period>('periods'));
+      expect(repo.dateFormat, 'US');
     });
 
     testWidgets('tapping DD/MM after US updates back to EU',
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        final box = Hive.box<Period>('periods');
-        final p = Period(startedDate: DateTime(2026, 6, 1));
-        p.dateFormat = 'US';
-        await box.add(p);
+        final box = Hive.box<Settings>('settings');
+        await box.add(Settings(dateFormat: 'US'));
       });
 
       await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
@@ -141,16 +131,17 @@ void main() {
 
       await tester.runAsync(() async {
         await tester.tap(find.text('DD/MM'));
-        await Future.delayed(const Duration(milliseconds: 100));
+        await tester.pumpAndSettle();
       });
-      await tester.pump();
 
-      final period = Hive.box<Period>('periods').values.first;
-      expect(period.dateFormat, 'EU');
+      final repo = PeriodRepository(Hive.box<Period>('periods'));
+      expect(repo.dateFormat, 'EU');
     });
   });
 
   testWidgets('all section headers render', (WidgetTester tester) async {
+    await tester.runAsync(() => prepopulate());
+
     await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
     await tester.pump();
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../models/period.dart';
-import '../services/notification_service.dart';
 import '../services/period_repository.dart';
 import '../widgets/period_calendar.dart';
 import '../widgets/period_row.dart';
@@ -21,22 +20,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _repo = PeriodRepository(Hive.box<Period>(PeriodRepository.boxName));
+    _repo = PeriodRepository(_repoBox);
     _load();
   }
+
+  Box<Period> get _repoBox => Hive.box<Period>(PeriodRepository.boxName);
 
   void _load() {
     setState(() {
       _entries = _repo.history();
     });
-  }
-
-  Set<DateTime> _loggedDates() {
-    final box = Hive.box<Period>(PeriodRepository.boxName);
-    return box.values
-        .map((p) => DateTime(
-            p.startedDate.year, p.startedDate.month, p.startedDate.day))
-        .toSet();
   }
 
   Future<void> _onAddPastPeriod() async {
@@ -48,7 +41,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       context,
       firstDate: firstDate,
       lastDate: lastDate,
-      loggedDates: _loggedDates(),
+      loggedDates: _repo.loggedDates(),
     );
     if (picked == null) return;
 
@@ -65,17 +58,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       return;
     }
 
-    final nextReminder = PeriodRepository.nextReminderDate(
-      picked,
-      cycleLength: _repo.currentCycleLength(),
-      reminderDaysBefore: _repo.reminderDaysBefore,
-    );
-    if (!nextReminder.isBefore(DateTime.now())) {
-      await NotificationService.instance.scheduleReminder(
-        nextReminder,
-        reminderDaysBefore: _repo.reminderDaysBefore,
-      );
-    }
+    await _repo.rescheduleReminder();
 
     if (!mounted) return;
     setState(() => _entries.insert(0, saved));
@@ -102,9 +85,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final firstDate = DateTime.now().subtract(const Duration(days: 365));
     final lastDate = DateTime.now().subtract(const Duration(days: 1));
+    final oldDate = period.startedDate;
 
-    // Don't count the period being edited as "already logged"
-    final logged = _loggedDates();
+    final logged = _repo.loggedDates();
     logged.remove(DateTime(
       period.startedDate.year,
       period.startedDate.month,
@@ -140,39 +123,56 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     period.startedDate = DateTime.utc(picked.year, picked.month, picked.day);
     if (!mounted) return;
+
+    try {
+      await period.save();
+    } catch (e) {
+      if (!mounted) return;
+      period.startedDate = oldDate;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Could not update: $e'),
+          duration: const Duration(seconds: 4),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+      return;
+    }
+
+    await _repo.rescheduleReminder();
+
+    if (!mounted) return;
     setState(() {
       final idx = _entries.indexWhere((p) => p.key == period.key);
       if (idx != -1) _entries[idx] = period;
       _entries.sort((a, b) => b.startedDate.compareTo(a.startedDate));
     });
 
-    period.save().then((_) {
-      try {
-        final current = _repo.currentPeriod();
-        if (current != null) {
-          final nextReminder = PeriodRepository.nextReminderDate(
-            current.startedDate,
-            cycleLength: _repo.currentCycleLength(),
-            reminderDaysBefore: _repo.reminderDaysBefore,
-          );
-          if (!nextReminder.isBefore(DateTime.now())) {
-            NotificationService.instance.scheduleReminder(
-              nextReminder,
-              reminderDaysBefore: _repo.reminderDaysBefore,
-            );
-          }
-        }
-      } on HiveError {
-        // Box was closed
-      }
-    });
-
     messenger.showSnackBar(
       SnackBar(
         content:
             Text('Updated to ${picked.toLocal().toString().split(' ').first}.'),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
+        persist: false,
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () async {
+            period.startedDate = oldDate;
+            try {
+              await period.save();
+              await _repo.rescheduleReminder();
+              if (!mounted) return;
+              setState(() {
+                final idx = _entries.indexWhere((p) => p.key == period.key);
+                if (idx != -1) _entries[idx] = period;
+                _entries.sort((a, b) => b.startedDate.compareTo(a.startedDate));
+              });
+            } on HiveError {
+              // Box was closed
+            }
+          },
+        ),
       ),
     );
   }
@@ -183,29 +183,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     setState(() => _entries.removeWhere((p) => p.key == period.key));
 
-    period.delete().then((_) {
+    // Fire-and-forget delete; the future is captured so Undo can serialise
+    // after it, avoiding the race where the delete completes mid-Undo.
+    final deleteFuture = period.delete();
+    deleteFuture.then((_) async {
       try {
-        final current = _repo.currentPeriod();
-        if (current != null) {
-          final nextReminder = PeriodRepository.nextReminderDate(
-            current.startedDate,
-            cycleLength: _repo.currentCycleLength(),
-            reminderDaysBefore: _repo.reminderDaysBefore,
-          );
-          if (!nextReminder.isBefore(DateTime.now())) {
-            NotificationService.instance.scheduleReminder(
-              nextReminder,
-              reminderDaysBefore: _repo.reminderDaysBefore,
-            );
-          }
-        } else {
-          NotificationService.instance.cancelReminder();
-        }
+        await _repo.rescheduleReminder();
       } on HiveError {
-        // Box was closed (e.g., during test teardown)
+        // Box was closed (e.g., during test tearDown)
       }
     });
 
+    if (!mounted) return;
     messenger.showSnackBar(
       SnackBar(
         content: Text('Deleted $dateStr.'),
@@ -215,32 +204,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () {
-            final box = Hive.box<Period>(PeriodRepository.boxName);
-            if (box.containsKey(period.key)) {
-              setState(() => _entries = _repo.history());
-              return;
-            }
             final restored = Period(startedDate: period.startedDate)
               ..trackingMode = period.trackingMode
               ..manualCycleLength = period.manualCycleLength
               ..reminderDaysBefore = period.reminderDaysBefore;
-            box.add(restored).then((_) {
-              try {
-                final nextReminder = PeriodRepository.nextReminderDate(
-                  restored.startedDate,
-                  cycleLength: _repo.currentCycleLength(),
-                  reminderDaysBefore: _repo.reminderDaysBefore,
-                );
-                if (!nextReminder.isBefore(DateTime.now())) {
-                  NotificationService.instance.scheduleReminder(
-                    nextReminder,
-                    reminderDaysBefore: _repo.reminderDaysBefore,
-                  );
-                }
-              } on HiveError {
-                // Box was closed
-              }
-            });
+            Hive.box<Period>(PeriodRepository.boxName).add(restored);
+            _repo.rescheduleReminder().catchError((_) {});
             if (!mounted) return;
             setState(() => _entries = _repo.history());
           },

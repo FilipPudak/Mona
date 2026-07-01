@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../models/period.dart';
+import '../models/settings.dart';
+import 'notification_service.dart';
 
-/// Read/write access to period records. Backed by a single Hive box.
-///
-/// Only the most recent period is consulted in v1; the full box is preserved
-/// for future history features.
+/// Read/write access to period records and user settings.
 class PeriodRepository {
-  PeriodRepository(this._box);
+  PeriodRepository(this._periodBox)
+      : _settingsBox = Hive.box<Settings>('settings') {
+    _migrateSettingsIfNeeded();
+  }
 
   static const String boxName = 'periods';
 
-  final Box<Period> _box;
+  final Box<Period> _periodBox;
+  final Box<Settings> _settingsBox;
 
-  int get periodCount => _box.values.length;
+  int get periodCount => _periodBox.values.length;
 
   bool hasEnoughHistory() => periodCount >= 4;
 
@@ -27,7 +30,7 @@ class PeriodRepository {
   }
 
   int? averageCycleLength() {
-    final all = _box.values.toList()
+    final all = _periodBox.values.toList()
       ..sort((a, b) => a.startedDate.compareTo(b.startedDate));
     if (all.length < 4) return null;
     final gaps = <int>[];
@@ -39,62 +42,96 @@ class PeriodRepository {
     return (gaps.reduce((a, b) => a + b) / gaps.length).round();
   }
 
-  String get trackingMode => currentPeriod()?.trackingMode ?? 'automatic';
-  int get manualCycleLength => currentPeriod()?.manualCycleLength ?? 28;
-  int get reminderDaysBefore => currentPeriod()?.reminderDaysBefore ?? 2;
-  String get dateFormat => currentPeriod()?.dateFormat ?? 'EU';
+  // ── Settings (stored in a separate typed Hive box) ─────────────────
+
+  String get trackingMode => _settingsBox.isNotEmpty
+      ? _settingsBox.values.first.trackingMode
+      : 'automatic';
+
+  int get manualCycleLength => _settingsBox.isNotEmpty
+      ? _settingsBox.values.first.manualCycleLength
+      : 28;
+
+  int get reminderDaysBefore => _settingsBox.isNotEmpty
+      ? _settingsBox.values.first.reminderDaysBefore
+      : 2;
+
+  String get dateFormat =>
+      _settingsBox.isNotEmpty ? _settingsBox.values.first.dateFormat : 'EU';
 
   Future<void> setTrackingMode(String value) async {
-    final period = currentPeriod();
-    if (period == null) return;
-    period.trackingMode = value;
-    await period.save();
+    if (_settingsBox.isEmpty) {
+      await _settingsBox.add(Settings(trackingMode: value));
+    } else {
+      _settingsBox.values.first.trackingMode = value;
+      await _settingsBox.values.first.save();
+    }
   }
 
   Future<void> setManualCycleLength(int value) async {
-    final period = currentPeriod();
-    if (period == null) return;
-    period.manualCycleLength = value;
-    await period.save();
+    if (_settingsBox.isEmpty) {
+      await _settingsBox.add(Settings(manualCycleLength: value));
+    } else {
+      _settingsBox.values.first.manualCycleLength = value;
+      await _settingsBox.values.first.save();
+    }
   }
 
   Future<void> setReminderDaysBefore(int value) async {
-    final period = currentPeriod();
-    if (period == null) return;
-    period.reminderDaysBefore = value;
-    await period.save();
+    if (_settingsBox.isEmpty) {
+      await _settingsBox.add(Settings(reminderDaysBefore: value));
+    } else {
+      _settingsBox.values.first.reminderDaysBefore = value;
+      await _settingsBox.values.first.save();
+    }
   }
 
   Future<void> setDateFormat(String value) async {
+    if (_settingsBox.isEmpty) {
+      await _settingsBox.add(Settings(dateFormat: value));
+    } else {
+      _settingsBox.values.first.dateFormat = value;
+      await _settingsBox.values.first.save();
+    }
+  }
+
+  // ── Migration from legacy Period-stored settings ───────────────────
+
+  void _migrateSettingsIfNeeded() {
+    if (_settingsBox.isNotEmpty) return;
     final period = currentPeriod();
     if (period == null) return;
-    period.dateFormat = value;
-    await period.save();
+    _settingsBox.add(Settings(
+      trackingMode: period.trackingMode,
+      manualCycleLength: period.manualCycleLength,
+      reminderDaysBefore: period.reminderDaysBefore,
+      dateFormat: period.dateFormat,
+    ));
   }
+
+  // ── Period CRUD ────────────────────────────────────────────────────
 
   /// Returns the most recent period, or `null` if none has been recorded.
   Period? currentPeriod() {
-    if (_box.isEmpty) return null;
-    final all = _box.values.toList()
+    if (_periodBox.isEmpty) return null;
+    final all = _periodBox.values.toList()
       ..sort((a, b) => a.startedDate.compareTo(b.startedDate));
     return all.last;
   }
 
   /// Returns up to [maxEntries] most recent periods, newest first.
-  /// Older records remain in storage but are not returned.
   List<Period> history({int maxEntries = 12}) {
-    if (_box.isEmpty) return const [];
-    final all = _box.values.toList()
+    if (_periodBox.isEmpty) return const [];
+    final all = _periodBox.values.toList()
       ..sort((a, b) => b.startedDate.compareTo(a.startedDate));
     if (all.length <= maxEntries) return all;
     return all.sublist(0, maxEntries);
   }
 
-  /// Returns `true` if a period was already recorded for [date]'s calendar
-  /// day (in local time).
+  /// Returns `true` if a period was already recorded for [date]'s calendar day.
   bool hasPeriodOn(DateTime date) {
     final day = DateTime(date.year, date.month, date.day);
-    for (final p in _box.values) {
+    for (final p in _periodBox.values) {
       final pDay = DateTime(
         p.startedDate.year,
         p.startedDate.month,
@@ -105,6 +142,13 @@ class PeriodRepository {
     return false;
   }
 
+  Set<DateTime> loggedDates() {
+    return _periodBox.values
+        .map((p) => DateTime(
+            p.startedDate.year, p.startedDate.month, p.startedDate.day))
+        .toSet();
+  }
+
   /// Stores a new period record if one does not already exist for [date]'s
   /// calendar day. Returns the saved instance, or `null` if a record for
   /// that day was already present.
@@ -112,9 +156,36 @@ class PeriodRepository {
     if (hasPeriodOn(date)) return null;
     final period =
         Period(startedDate: DateTime.utc(date.year, date.month, date.day));
-    await _box.add(period);
+    await _periodBox.add(period);
     return period;
   }
+
+  /// Cancel and reschedule the reminder based on the current period and
+  /// settings. Cancels if no period exists.
+  Future<void> rescheduleReminder() async {
+    final period = currentPeriod();
+    if (period == null) {
+      await NotificationService.instance.cancelReminder();
+      return;
+    }
+    try {
+      final nextReminder = nextReminderDate(
+        period.startedDate,
+        cycleLength: currentCycleLength(),
+        reminderDaysBefore: reminderDaysBefore,
+      );
+      if (!nextReminder.isBefore(DateTime.now())) {
+        await NotificationService.instance.scheduleReminder(
+          nextReminder,
+          reminderDaysBefore: reminderDaysBefore,
+        );
+      }
+    } on HiveError {
+      // Box was closed (e.g., during test tearDown)
+    }
+  }
+
+  // ── Static helpers ─────────────────────────────────────────────────
 
   /// Raw day (1-based) since [start]. Lower bound 1, upper bound 99.
   static int dayOfCycle(DateTime start, DateTime today) {

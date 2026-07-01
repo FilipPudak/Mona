@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../models/period.dart';
-import '../services/notification_service.dart';
 import '../services/period_repository.dart';
 import '../widgets/day_counter.dart';
 import '../widgets/period_list_picker.dart';
@@ -79,17 +78,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen>
         return;
       }
 
-      final nextReminder = PeriodRepository.nextReminderDate(
-        picked,
-        cycleLength: _repo.currentCycleLength(),
-        reminderDaysBefore: _repo.reminderDaysBefore,
-      );
-      if (!nextReminder.isBefore(DateTime.now())) {
-        await NotificationService.instance.scheduleReminder(
-          nextReminder,
-          reminderDaysBefore: _repo.reminderDaysBefore,
-        );
-      }
+      await _repo.rescheduleReminder();
 
       if (!mounted) return;
       setState(() {});

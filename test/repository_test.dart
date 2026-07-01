@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
 import 'package:mona/models/period.dart';
+import 'package:mona/models/settings.dart';
 import 'package:mona/services/period_repository.dart';
 
 void main() {
@@ -16,13 +17,20 @@ void main() {
     if (!Hive.isAdapterRegistered(PeriodAdapter().typeId)) {
       Hive.registerAdapter(PeriodAdapter());
     }
+    if (!Hive.isAdapterRegistered(SettingsAdapter().typeId)) {
+      Hive.registerAdapter(SettingsAdapter());
+    }
     box = await Hive.openBox<Period>('periods');
+    await Hive.openBox<Settings>('settings');
     repo = PeriodRepository(box);
   });
 
   tearDown(() async {
     await box.close();
+    final settings = Hive.box<Settings>('settings');
+    await settings.close();
     await Hive.deleteBoxFromDisk('periods');
+    await Hive.deleteBoxFromDisk('settings');
   });
 
   group('currentPeriod', () {
@@ -148,15 +156,19 @@ void main() {
       expect(repo.reminderDaysBefore, 2);
     });
 
-    test('reads from current period when one exists', () async {
+    test('migrates from current period when settings box is empty', () async {
       final p = Period(startedDate: DateTime(2026, 6, 1));
       p.trackingMode = 'manual';
       p.manualCycleLength = 35;
       p.reminderDaysBefore = 3;
+      p.dateFormat = 'US';
       await box.add(p);
-      expect(repo.trackingMode, 'manual');
-      expect(repo.manualCycleLength, 35);
-      expect(repo.reminderDaysBefore, 3);
+      // A fresh repo should migrate the period's settings into the settings box
+      final repo2 = PeriodRepository(box);
+      expect(repo2.trackingMode, 'manual');
+      expect(repo2.manualCycleLength, 35);
+      expect(repo2.reminderDaysBefore, 3);
+      expect(repo2.dateFormat, 'US');
     });
 
     test('setter updates trackingMode on current period', () async {

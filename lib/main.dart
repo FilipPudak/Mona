@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'models/period.dart';
+import 'models/settings.dart';
 import 'screens/period_tracker_screen.dart';
 import 'services/notification_service.dart';
 import 'services/period_repository.dart';
@@ -17,9 +18,16 @@ Future<void> main() async {
   if (!Hive.isAdapterRegistered(PeriodAdapter().typeId)) {
     Hive.registerAdapter(PeriodAdapter());
   }
+  if (!Hive.isAdapterRegistered(SettingsAdapter().typeId)) {
+    Hive.registerAdapter(SettingsAdapter());
+  }
 
   if (!Hive.isBoxOpen(PeriodRepository.boxName)) {
     await Hive.openBox<Period>(PeriodRepository.boxName);
+  }
+
+  if (!Hive.isBoxOpen('settings')) {
+    await Hive.openBox<Settings>('settings');
   }
 
   // Initialize local notifications (idempotent). Safe to await before runApp;

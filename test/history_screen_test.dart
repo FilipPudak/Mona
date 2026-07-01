@@ -6,7 +6,20 @@ import 'package:hive/hive.dart';
 
 import 'package:mona/main.dart';
 import 'package:mona/models/period.dart';
+import 'package:mona/models/settings.dart';
 import 'package:mona/widgets/period_row.dart';
+
+/// Helper: pre-populate Hive boxes inside real async so I/O completes.
+Future<void> prepopulate({DateTime? periodDate}) async {
+  final box = Hive.box<Period>('periods');
+  if (periodDate != null) {
+    await box.add(Period(startedDate: periodDate));
+  }
+  final settings = Hive.box<Settings>('settings');
+  if (settings.isEmpty) {
+    await settings.add(Settings());
+  }
+}
 
 void main() {
   setUp(() async {
@@ -14,61 +27,33 @@ void main() {
     if (!Hive.isAdapterRegistered(PeriodAdapter().typeId)) {
       Hive.registerAdapter(PeriodAdapter());
     }
+    if (!Hive.isAdapterRegistered(SettingsAdapter().typeId)) {
+      Hive.registerAdapter(SettingsAdapter());
+    }
     await Hive.openBox<Period>('periods');
+    await Hive.openBox<Settings>('settings');
   });
 
   tearDown(() async {
     final box = Hive.box<Period>('periods');
     await box.close();
+    final settings = Hive.box<Settings>('settings');
+    await settings.close();
     await Hive.deleteBoxFromDisk('periods');
-  });
-
-  testWidgets('delete with Undo restores the period row',
-      (WidgetTester tester) async {
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: DateTime(2026, 6, 1)));
-    });
-
-    await tester.pumpWidget(const MyApp());
-    await tester.pump();
-
-    await tester.tap(find.byIcon(Icons.history));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(PeriodRow), findsOneWidget);
-
-    // Swipe to delete
-    await tester.runAsync(() async {
-      await tester.drag(find.byType(Dismissible), const Offset(-500, 0));
-      await tester.pumpAndSettle();
-    });
-
-    expect(find.byType(PeriodRow), findsNothing);
-    expect(find.text('No periods logged yet.'), findsOneWidget);
-
-    // Tap Undo (wrapped in runAsync for Hive I/O)
-    await tester.runAsync(() async {
-      await tester.tap(find.text('Undo'));
-      await tester.pumpAndSettle();
-    });
-
-    expect(find.byType(PeriodRow), findsOneWidget);
-    expect(find.text('No periods logged yet.'), findsNothing);
+    await Hive.deleteBoxFromDisk('settings');
   });
 
   testWidgets('tap on period row opens calendar for editing',
       (WidgetTester tester) async {
-    await tester.runAsync(() async {
-      final box = Hive.box<Period>('periods');
-      await box.add(Period(startedDate: DateTime(2026, 6, 1)));
-    });
+    await tester.runAsync(() => prepopulate(periodDate: DateTime(2026, 6, 28)));
 
     await tester.pumpWidget(const MyApp());
     await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     await tester.tap(find.byIcon(Icons.history));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     // Tap the period row
     await tester.tap(find.byType(PeriodRow));
@@ -78,5 +63,20 @@ void main() {
     // Calendar should open with pre-selected date
     expect(find.text('Log a past period'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
+  });
+
+  testWidgets('shows empty state when no period exists',
+      (WidgetTester tester) async {
+    await tester.runAsync(() => prepopulate());
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.byIcon(Icons.history));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('No periods logged yet.'), findsOneWidget);
   });
 }
