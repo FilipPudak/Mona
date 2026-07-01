@@ -138,7 +138,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen>
 
     final bool overdue = period != null &&
         PeriodRepository.isOverdue(period.startedDate, today, cycleLength);
-    _updatePulse(overdue);
+    _updatePulse(period == null || overdue);
     final Color effectiveDayColor = overdue && dayColor == Colors.black87
         ? dayColor.withValues(alpha: 0.38)
         : dayColor;
@@ -159,7 +159,8 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen>
       appBar: AppBar(
         title: const Text('Mona', style: TextStyle(color: Color(0xFFE68192))),
         actions: [
-          TextButton(
+          IconButton(
+            icon: const Icon(Icons.history),
             onPressed: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute<void>(
@@ -168,8 +169,6 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen>
               );
               if (mounted) setState(() {});
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.black87),
-            child: const Text('History'),
           ),
           IconButton(
             icon: const Icon(Icons.settings),

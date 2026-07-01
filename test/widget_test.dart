@@ -262,11 +262,19 @@ void main() {
     expect(switchWidget.value, isFalse);
   });
 
+  testWidgets('App bar has history icon to navigate to records',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    expect(find.byIcon(Icons.history), findsOneWidget);
+  });
+
   testWidgets('History shows empty state', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
-    await tester.tap(find.text('History'));
+    await tester.tap(find.byIcon(Icons.history));
     await tester.pumpAndSettle();
 
     expect(find.text('No periods logged yet.'), findsOneWidget);
@@ -282,7 +290,7 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
-    await tester.tap(find.text('History'));
+    await tester.tap(find.byIcon(Icons.history));
     await tester.pumpAndSettle();
 
     expect(find.byType(PeriodRow), findsOneWidget);
@@ -298,7 +306,7 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
-    await tester.tap(find.text('History'));
+    await tester.tap(find.byIcon(Icons.history));
     await tester.pumpAndSettle();
 
     expect(find.byType(PeriodRow), findsOneWidget);

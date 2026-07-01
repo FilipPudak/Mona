@@ -287,6 +287,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     onDismissed: (_) => _onDeletePeriod(period),
                     child: PeriodRow(
                       period: period,
+                      dateFormat: _repo.dateFormat,
                       onTap: () => _onEditPeriod(period),
                     ),
                   );

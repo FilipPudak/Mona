@@ -10,7 +10,7 @@
 
 **Current period** — The most recently logged period start. Used to determine the current cycle day and phase.
 
-**History** — The list of past period start dates, ordered newest first.
+**History** — The list of past period start dates, ordered newest first. Entered via a clock-arrow icon (`Icons.history`) in the main screen app bar, replacing the previous text button.
 
 **First period** — The initial period start logged at first launch. There is no separate welcome screen; the `+` button centered on the blank screen serves as the onboarding mechanism.
 
@@ -56,7 +56,7 @@
 
 **Expected date** — The due date shown as a bare date below the day counter. Format is `DD/MM` (default EU) or `MM/DD` (US configurable). Goes dim when overdue.
 
-**Log action** — A rose (`#E68192`) circular button with a white `+` icon. Serves as primary action to log a new period and as implicit onboarding on first launch. Position is centered on first launch (no periods logged) and bottom-anchored after the first period is recorded. Transition between positions is animated. Pulses subtly (scale oscillation) when overdue — starting the day after the due date — as a re-engagement cue.
+**Log action** — A rose (`#E68192`) circular button with a white `+` icon. Serves as primary action to log a new period and as implicit onboarding on first launch. Position is centered on first launch (no periods logged) and bottom-anchored after the first period is recorded. Transition between positions is animated. Pulses subtly (scale oscillation) in two states: **onboarding** (empty state, no periods logged) and **overdue** (starting the day after the due date). Same subtle pulse animation for both.
 
 ## Actions
 
@@ -74,7 +74,7 @@
 
 ## Settings
 
-**Date format** — The format for the expected date on the main screen. Default is EU (`DD/MM`). User may switch to US (`MM/DD`) via a toggle in Settings.
+**Date format** — The format for dates across the app. Default is EU (`DD/MM`). User may switch to US (`MM/DD`) via a toggle in Settings. Affects both the expected date on the main screen and period dates in history rows. History rows append `/YYYY` when the period year differs from the current year.
 
 **Settings entry** — A gear icon in the app bar. Standard, minimal, universally understood.
 
