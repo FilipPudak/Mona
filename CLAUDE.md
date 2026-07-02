@@ -19,7 +19,7 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - Swipe-to-delete on history rows (all periods deletable, including active)
 - Tap row to edit: opens calendar pre-selected to that record's date
 - SnackBar Undo after every log, delete, and edit action (3.5s duration)
-- Cycle colors: day 1-6 rose (#E68192), fertile window green (ovulationDay ± 3 where ovulationDay = cycleLength - 14), else black
+- Cycle colors: day 1-6 rose (#E68192), fertile window green (ovulationDay - 4 to ovulationDay + 3 where ovulationDay = cycleLength - 14), else black
 - Day counter: raw days since last period (1-based), capped at 99 for display (99+)
 - Expected date: bare date (`DD/MM` or `MM/DD`), no prefix text, no caption
 - Overdue: day counter dims (0.38 opacity, except rose phase stays full), expected date dims, + button pulses (1.08x scale oscillation)
@@ -98,7 +98,7 @@ Scandinavian-minimal Flutter period tracker. Light gray-white bg, black text, re
 - **Input**: no validation — trust user; correction via edit/delete
 - **Editing**: allowed on any period, including active
 - **Day counter**: raw days-since (1-based, capped at 99), not capped at cycle length
-- **Fertile window**: green phase = `ovulationDay ± 3` (dynamic)
+- **Fertile window**: green phase = `ovulationDay - 4` to `ovulationDay + 3` (dynamic)
 - **Settings**: saved to separate `Settings` Hive box (not on Period model); includes `trackingMode`, `manualCycleLength`, `reminderDaysBefore`, `dateFormat`
 - **Notifications**: single notification; cancel on toggle OFF, reschedule on toggle ON; `rescheduleReminder()` handles both
 

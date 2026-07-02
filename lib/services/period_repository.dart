@@ -194,7 +194,7 @@ class PeriodRepository {
   /// `ovulationDay = cycleLength - 14`.
   static (int, int) fertileWindow(int cycleLength) {
     final ovulationDay = cycleLength - 14;
-    return (ovulationDay - 3, ovulationDay + 3);
+    return (ovulationDay - 4, ovulationDay + 3);
   }
 
   /// Returns the phase color for a given [day] and [cycleLength].

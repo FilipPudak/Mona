@@ -374,21 +374,21 @@ void main() {
   });
 
   group('fertileWindow', () {
-    test('returns (11, 17) for 28-day cycle', () {
+    test('returns (10, 17) for 28-day cycle', () {
       final (start, end) = PeriodRepository.fertileWindow(28);
-      expect(start, 11);
+      expect(start, 10);
       expect(end, 17);
     });
 
-    test('returns (18, 24) for 35-day cycle', () {
+    test('returns (17, 24) for 35-day cycle', () {
       final (start, end) = PeriodRepository.fertileWindow(35);
-      expect(start, 18);
+      expect(start, 17);
       expect(end, 24);
     });
 
-    test('returns (4, 10) for 21-day cycle', () {
+    test('returns (3, 10) for 21-day cycle', () {
       final (start, end) = PeriodRepository.fertileWindow(21);
-      expect(start, 4);
+      expect(start, 3);
       expect(end, 10);
     });
   });
