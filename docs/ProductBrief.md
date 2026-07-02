@@ -59,28 +59,9 @@ Avoid:
 
 The user opens the app.
 
-Display:
-
-```
-Welcome
-
-A simple period reminder.
-
-Let's set up your cycle.
-```
-
-User provides:
-
-* Date of last period start
-* Optional cycle length preference
-
-Default cycle length:
-
-```
-28 days
-```
-
-The app then creates the first prediction.
+No onboarding. The main screen shows a centered rose `+` circle button — the one action available.
+Tapping it opens a list picker with "Today", "Yesterday", "X days ago" (with absolute date).
+No configuration is required to start tracking.
 
 ---
 
@@ -93,23 +74,20 @@ Example:
 ```
 Day 12
 
-16 days until your next period
-
-Expected:
-June 28
+28/06
 
 
-[ Period Started Today ]
+           (+)
 ```
 
-The user should always understand:
+Elements, top to bottom:
 
-1. Current cycle day
-2. Days remaining until expected period
-3. Expected period date
-4. How to reset the cycle
+1. **Day counter** — raw days since last period start (1-based, `99+` after 100).
+2. **Expected date** — bare date (`DD/MM` or `MM/DD`), no prefix, no caption.
+3. **Rose `+` circle button** — bottom-anchored after first period, centered on first launch.
 
-The main screen should contain only the information needed for this.
+When overdue the counter dims, the date dims, and the button pulses.
+Colour phases: rose (days 1–6), green (fertile window = ovulation ± 3), else black.
 
 ---
 
@@ -117,18 +95,17 @@ The main screen should contain only the information needed for this.
 
 ## Feature 1: Period Start Logging
 
-Primary action:
+Primary action: the rose `+` circle button.
 
-```
-Period Started Today
-```
+Tapping opens a bottom-sheet list picker with relative labels ("Today", "Yesterday", "X days ago").
 
-When pressed:
+When a date is selected:
 
-* Save today's date
-* Reset the cycle
+* Save the date
+* Reset the cycle calculation
 * Recalculate the next expected period
 * Reschedule notifications
+* Show a SnackBar with Undo action
 
 This is the most important interaction in the app.
 
@@ -214,17 +191,8 @@ Use user-selected cycle length
 
 ## After Enough History Exists
 
-Once the user has logged multiple cycles:
-
-Example:
-
-```
-Your cycle appears to average 29 days.
-
-Would you like to switch to automatic tracking?
-```
-
-User chooses whether to enable it.
+Once the user has logged 3 complete cycles, automatic tracking kicks in silently.
+The user can switch between Manual and Automatic at any time in Settings — no prompt needed.
 
 ---
 
@@ -274,18 +242,12 @@ Cycle Length
 
 Reminder
 
-2 days before >
-
-
-Notifications
-
-On >
-
-
-Privacy
-
-Your data stays on this device
+ Days before > 2 days
+ Notification     ON
 ```
+
+The "Days before" row is disabled (grayed, no chevron) when Notification is OFF.
+Switch label is "Notification" (singular). Toggling OFF cancels the pending reminder; ON reschedules it.
 
 ---
 
@@ -311,25 +273,10 @@ Requirements:
 
 # 10. History Screen
 
-Keep history simple.
-
-Example:
-
-```
-History
-
-June 1
-May 3
-April 5
-March 7
-```
-
-Purpose:
-
-* Build trust
-* Show previous cycle starts
-
-Do not create a complex calendar view initially.
+A list of logged periods with swipe-to-delete (any period, including active) and tap-to-edit.
+A `+` button opens a calendar picker (past dates only, 365-day cap, dots on logged dates).
+Editing opens the same calendar pre-selected to that record's date.
+Every log, delete, and edit shows a SnackBar with Undo.
 
 ---
 
@@ -359,7 +306,6 @@ Your data stays on your phone.
 Do not implement initially:
 
 * Fertility tracking
-* Ovulation prediction
 * Pregnancy mode
 * Symptom tracking
 * Mood tracking
@@ -407,18 +353,24 @@ User Interface
 
 # 14. Data Model
 
-Example:
+Two Hive boxes:
 
+**`periods`** box — list of period start dates:
+```json
+[
+  { "startedDate": "2026-01-03" },
+  { "startedDate": "2026-02-01" },
+  { "startedDate": "2026-03-02" }
+]
+```
+
+**`settings`** box — a single record:
 ```json
 {
   "trackingMode": "automatic",
   "manualCycleLength": 28,
-  "periodStarts": [
-    "2026-01-03",
-    "2026-02-01",
-    "2026-03-02"
-  ],
-  "reminderDaysBefore": 2
+  "reminderDaysBefore": 2,
+  "dateFormat": "EU"
 }
 ```
 
